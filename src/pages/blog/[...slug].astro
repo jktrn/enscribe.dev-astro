@@ -78,7 +78,7 @@ const authors = await parseAuthors(post.data.authors ?? [])
 
     <section class="flex flex-col gap-6 text-center">
       <div>
-        <h1 class="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
+        <h1 class="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
           {post.data.title}
         </h1>
 
@@ -148,7 +148,9 @@ const authors = await parseAuthors(post.data.authors ?? [])
 
     {headings.length > 0 && <TableOfContents headings={headings} />}
 
-    <article class="prose prose-stone max-w-none dark:prose-invert">
+    <article
+      class="notranslate prose prose-sm prose-neutral max-w-none dark:prose-invert"
+    >
       <Content />
     </article>
 

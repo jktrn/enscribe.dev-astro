@@ -29,7 +29,7 @@ export async function parseAuthors(authors: string[]) {
       const author = await getEntry('authors', slug)
       return {
         name: author?.data?.name || slug,
-        avatar: author?.data?.avatar || '/static/logo.png',
+        avatar: author?.data?.avatar || '/static/logo.webp',
         isRegistered: !!author,
       }
     } catch (error) {

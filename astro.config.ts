@@ -3,10 +3,10 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import tailwind from '@astrojs/tailwind'
-import { transformerCopyButton } from '@rehype-pretty/transformers'
 import {
   transformerMetaHighlight,
   transformerNotationDiff,
+  transformerRenderWhitespace,
 } from '@shikijs/transformers'
 import { defineConfig } from 'astro/config'
 import rehypeKatex from 'rehype-katex'
@@ -15,10 +15,11 @@ import remarkEmoji from 'remark-emoji'
 import remarkMath from 'remark-math'
 import remarkToc from 'remark-toc'
 import sectionize from '@hbsnow/rehype-sectionize'
+import { metaSkipTransformer } from './src/lib/metaSkipTransformer'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://astro-erudite.vercel.app',
+  site: 'https://enscribe-dev-astro.vercel.app',
   integrations: [
     tailwind({
       applyBaseStyles: false,
@@ -32,22 +33,19 @@ export default defineConfig({
     rehypePlugins: [
       rehypeHeadingIds,
       rehypeKatex,
-      // @ts-expect-error
-      sectionize,
+      sectionize as any,
       [
         rehypePrettyCode,
         {
           theme: {
-            light: 'github-light-high-contrast',
-            dark: 'github-dark-high-contrast',
+            light: 'everforest-light',
+            dark: 'everforest-dark',
           },
           transformers: [
             transformerNotationDiff(),
             transformerMetaHighlight(),
-            transformerCopyButton({
-              visibility: 'hover',
-              feedbackDuration: 1000,
-            }),
+            transformerRenderWhitespace(),
+            metaSkipTransformer(),
           ],
         },
       ],

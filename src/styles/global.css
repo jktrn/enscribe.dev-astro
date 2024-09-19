@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Geist';
-  src: url('/fonts/GeistVF.woff2') format('woff2');
-  font-weight: 100 900;
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono[wght].ttf') format('ttf');
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMonoVF.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Italic[wght].ttf') format('ttf');
+  font-weight: 100 800;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -22,7 +22,7 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
+    --primary: 34 54% 81%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 80.1%;
     --secondary-foreground: 0 0% 9%;
@@ -37,10 +37,11 @@
     --border: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
+    --primary: 34 54% 81%;
     --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
@@ -83,7 +84,7 @@
 
 @layer components {
   article {
-    @apply prose-headings:scroll-mt-20 prose-headings:break-words prose-p:break-words;
+    @apply prose-headings:scroll-mt-20 prose-headings:break-words prose-p:break-words prose-a:!text-primary prose-blockquote:!not-italic prose-blockquote:!text-muted-foreground prose-pre:!px-0 prose-img:mx-auto prose-img:rounded-md prose-img:border;
 
     .katex-display {
       @apply overflow-x-auto overflow-y-hidden py-4;
@@ -157,6 +158,24 @@
             @apply bg-muted-foreground/40 py-[7px];
           }
 
+          .tab {
+            @apply relative;
+          }
+
+          .tab::before {
+            @apply absolute opacity-30;
+            content: '⇥';
+          }
+
+          /* Skip lines */
+          .skip {
+            @apply my-2 bg-foreground/5 text-center text-foreground;
+
+            &::before {
+              content: '' !important;
+            }
+          }
+
           /* Diff lines */
           .diff {
             &.add {
@@ -164,12 +183,16 @@
             }
             &.remove {
               @apply bg-destructive/15;
+              &::before {
+                content: '-';
+                counter-increment: none;
+              }
             }
           }
 
           /* Copy button */
           > button:has(> span) {
-            @apply right-0.5 top-[3px] m-0 size-8 rounded-md bg-transparent p-1 backdrop-blur-none;
+            @apply right-1 top-1 m-0 size-8 rounded-lg bg-secondary p-1 backdrop-blur-none transition-all duration-200;
           }
         }
       }
