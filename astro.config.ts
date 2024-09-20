@@ -17,6 +17,8 @@ import remarkToc from 'remark-toc'
 import sectionize from '@hbsnow/rehype-sectionize'
 import { metaSkipTransformer } from './src/lib/metaSkipTransformer'
 
+import icon from 'astro-icon'
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://enscribe-dev-astro.vercel.app',
@@ -27,12 +29,18 @@ export default defineConfig({
     sitemap(),
     mdx(),
     react(),
+    icon(),
   ],
   markdown: {
     syntaxHighlight: false,
     rehypePlugins: [
       rehypeHeadingIds,
-      rehypeKatex,
+      [
+        rehypeKatex,
+        {
+          strict: false,
+        },
+      ],
       sectionize as any,
       [
         rehypePrettyCode,

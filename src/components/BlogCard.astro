@@ -29,11 +29,12 @@ const authors = await parseAuthors(entry.data.authors ?? [])
   >
     {
       entry.data.image && (
-        <div class="sm:flex-shrink-0">
+        <div class="max-w-[275px] sm:flex-shrink-0">
           <Image
             src={entry.data.image}
             alt={entry.data.title}
-            width={275}
+            width={1200}
+            height={630}
             class="object-cover"
           />
         </div>
@@ -75,7 +76,7 @@ const authors = await parseAuthors(entry.data.authors ?? [])
       {
         entry.data.tags && (
           <div class="flex flex-wrap gap-2">
-            {entry.data.tags.map((tag) => (
+            {entry.data.tags.map((tag: string) => (
               <Badge variant="secondary">{tag}</Badge>
             ))}
           </div>
