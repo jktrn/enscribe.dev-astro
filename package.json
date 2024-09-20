@@ -9,7 +9,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write ./src/**/*.{astro,ts,tsx}"
   },
   "dependencies": {
     "@astrojs/check": "^0.7.0",
@@ -68,6 +68,12 @@
         "files": "*.astro",
         "options": {
           "parser": "astro"
+        }
+      },
+      {
+        "files": "*.mdx",
+        "options": {
+          "parser": "mdx"
         }
       }
     ]

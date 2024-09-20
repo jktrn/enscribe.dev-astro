@@ -5,13 +5,13 @@ import { Badge } from '@/components/ui/badge'
 import { CheckCircle, FileText, PenTool, Star, Tag, Users } from 'lucide-react'
 
 interface Solver {
-  avatar: string
-  href: string
+  avatar?: string
+  href?: string
   name: string
 }
 
 interface ChallengeProps {
-  title: string
+  title?: string
   solvers?: Solver[]
   authors?: string[]
   points?: number
@@ -31,8 +31,12 @@ const {
 } = Astro.props as ChallengeProps
 ---
 
-<div class="flex flex-col gap-y-4 rounded-xl border p-4">
-  <div class="not-prose text-xl font-bold text-foreground">{title}</div>
+<div class="mx-auto flex flex-col gap-y-4 rounded-xl border p-4">
+  {
+    title && (
+      <div class="not-prose text-xl font-bold text-foreground">{title}</div>
+    )
+  }
   <div class="not-prose flex flex-col divide-y">
     {
       solvers.length > 0 && (
@@ -42,24 +46,36 @@ const {
             {solvers.length > 1 ? 'Solvers' : 'Solver'}
           </div>
           <div class="flex flex-1 flex-wrap gap-2">
-            {solvers.map((solver) => (
-              <Link
-                href={solver.href}
-                class="flex items-center gap-x-1"
-                external
-              >
-                <AvatarComponent
-                  client:load
-                  src={solver.avatar}
-                  alt={`${solver.name}'s avatar`}
-                  fallback={solver.name[0]}
-                  className="size-4 rounded-full"
-                />
-                <span class="text-xs text-foreground underline underline-offset-2">
-                  {solver.name}
-                </span>
-              </Link>
-            ))}
+            {solvers.map((solver) =>
+              solver.href ? (
+                <Link
+                  href={solver.href}
+                  class="flex items-center gap-x-1"
+                  underline
+                  external
+                >
+                  <AvatarComponent
+                    client:load
+                    src={solver.avatar || '/static/logo.webp'}
+                    alt={`${solver.name}'s avatar`}
+                    fallback={solver.name[0]}
+                    className="size-4 rounded-full"
+                  />
+                  <span class="text-xs text-foreground">{solver.name}</span>
+                </Link>
+              ) : (
+                <div class="flex items-center gap-x-1">
+                  <AvatarComponent
+                    client:load
+                    src={solver.avatar || '/static/logo.webp'}
+                    alt={`${solver.name}'s avatar`}
+                    fallback={solver.name[0]}
+                    className="size-4 rounded-full"
+                  />
+                  <span class="text-xs text-foreground">{solver.name}</span>
+                </div>
+              ),
+            )}
           </div>
         </div>
       )

@@ -3,13 +3,13 @@ title: 'A Hackable Unity Implementation of Project Sekai’s Gacha System'
 description: 'I created a fully functional, hackable replica of Project Sekai’s gacha system for SekaiCTF 2023. This was my design process.'
 date: 2023-08-15
 tags: ['unity', 'game-hacking', 'reverse-engineering']
-image: 'banner.webp'
+image: 'assets/banner.webp'
 authors: ['enscribe']
 ---
 
 import Challenge from '@/components/Challenge.astro'
 import StaticTweet from '@/components/StaticTweet.astro'
-import VideoPreview from './preview.mp4'
+import VideoPreview from './assets/preview.mp4'
 
 ## Intro
 
@@ -40,11 +40,11 @@ The gacha mechanic is most commonly found in free-to-play mobile games, and is o
 
 Gacha pools often look something like this, with similar semantic colors representing each of the rarities:
 
-![Gacha Pool](gacha-pool.svg)
+![Gacha Pool](assets/gacha-pool.svg)
 
 Rolling on this banner provides a chance to receive a drop from each of the rarity tiers:
 
-![Gacha Model](gacha-model.svg)
+![Gacha Model](assets/gacha-model.svg)
 
 This transformation from a simple toy capsule game catered towards younger children into a fully fledged business model has been subject to countless scrutiny and controversy, mainly due to its predatory monetization system and potential to develop gambling addictions within its playerbase. Many legal jurisdictions require gacha games to disclose the probability of obtaining each rarity tier (which will be important later in the challenge).
 
@@ -56,13 +56,13 @@ In a multitude of different gacha games, a "guaranteed drop" mechanic, colloquia
 
 Let's take the gacha system of a popular gacha game as of writing, [Genshin Impact](https://en.wikipedia.org/wiki/Genshin_Impact), as an example. As banners in this game utilize the soft/hard pity system, the player is guaranteed to obtain a 5-star character after 90 pulls (hard pity), and the chance to obtain a 5-star character increases with each pull after 74 pulls (soft pity):
 
-![Genshin Impact Pity](genshin-pity.svg)
+![Genshin Impact Pity](assets/genshin-pity.svg)
 
 By increasing the chance to obtain a 5-star character with each pull, the player is more likely to obtain a 5-star character before the hard pity threshold is reached.
 
 However, Project Sekai doesn't utilize this system. It uses the simple "hard pity" system, with a small change: your pulls add to a "gacha bonus points" counter, which guarantees a 4-star and "pick-up" (featured character) 4-star at 50 and 100 pulls, respectively. You get 0.5 points for a pull using free currency, and 1 point for a pull using paid currency, illustrated as such in this diagram:
 
-![Project Sekai Gacha](project-sekai-gacha.svg)
+![Project Sekai Gacha](assets/project-sekai-gacha.svg)
 
 For the sake of simplicity within the challenge, I decided to implement a **pure hard pity** system, where the rate of rolling characters is static, and a 4-star character is guaranteed after a certain amount of pulls.
 
@@ -70,7 +70,7 @@ For the sake of simplicity within the challenge, I decided to implement a **pure
 
 Learning from feedback in our survey last year, we ([Project SEKAI CTF](https://sekai.team/)) discovered that a lot of our players were actually beginners——over half of the playerbase that took the survey had less than 5 CTFs worth of experience under their belt:
 
-![SekaiCTF 2022 Pie Chart](2022-pie-chart.svg)
+![SekaiCTF 2022 Pie Chart](assets/2022-pie-chart.svg)
 
 Combined with the fact we occasionally attract players from the Project Sekai community (a community which has absolutely nothing to do with cybersecurity), we decided that it would be best to design a beginner-friendly, eye-candy challenge that would attract a newer playerbase to register for our CTF and try the introductory challenges. This was a perfect opportunity for us to clone an aspect of the game that inspired our entire CTF theme, and to implement it in a way that would be engaging and educational for newer players. A Unity reverse engineering challenge would be the perfect fit, as plenty of Unity game-hacking resources exist online, and compiled Unity bundles are trivial to reverse-engineer and modify.
 
@@ -80,7 +80,7 @@ Although "cloning" the game and its functionality might not be too brain-rotting
 
 > The challenge will provide users with a Unity game bundle. The game will be a Project Sekai gacha emulator, and the goal is to pull a special 4\* card (`Happy Birthday！！2023 - こはね 小豆沢`) to receive the flag.
 
-![Brainstorming I](brainstorming-1.svg)
+![Brainstorming I](assets/brainstorming-1.svg)
 
 > Here are some basic details:
 >
@@ -88,7 +88,7 @@ Although "cloning" the game and its functionality might not be too brain-rotting
 > 2. All of the characters available in the gacha pool will be the 2* and 3* variations of Kohane Azusawa.
 > 3. The player can "hack" the game by modifying the crystal amount to continue rolling. However, the desired drop (`Happy Birthday！！2023 - こはね 小豆沢`) is **rigged to be 0%**. The only way to get the character is to pull 1,000,000 (one million) times to guarantee a drop through the "hard pity" system. Since this is evidently a time-inefficient process, they will need to find a way to change their pity counter.
 
-![Brainstorming II](brainstorming-2.svg)
+![Brainstorming II](assets/brainstorming-2.svg)
 
 > There will be a secret endpoint IP (obfuscated through simple base64) in one of the C# scripts. Each gacha 10-pull will actually send a `POST` request to the server with a payload. The players will need to both recognize this obfuscation and realize that a `POST` request is being made through reading the code.
 > The generic structure of the request includes:
@@ -152,7 +152,7 @@ Since I'm really comfortable with vanilla TypeScript, I decided that it'd be bes
 
 I created a `gacha.json`, which contains the entire pool of characters that we used. Since the entire challenge is themed around Kohane Azusawa, I utilized the pool from her 2023 birthday banner——the drop rates and characters are fully available on [sekai.best](https://sekai.best/gacha/302)'s entry of the banner:
 
-![Sekai.best Pool](sekai-best-pool.gif)
+![Sekai.best Pool](assets/sekai-best-pool.gif)
 
 Manually going through every entry listed in the database, I created the following JSON file:
 
@@ -540,7 +540,7 @@ Let's talk about the Unity graphics next.
 
 I wanted to make the game look as polished and as similar to the real product as possible, so I began by recreating and grabbing all of the assets that the game used in the gacha page. I found a bunch of YouTube videos which provided a nice overview of what the in-game screen looked like:
 
-![Example Screen](example-screen.png)
+![Example Screen](assets/example-screen.png)
 
 Unfortunately, there weren't any datamines/rips of Project Sekai that I could find which contained my desired UI elements, and I had to remake them from scratch in graphic design software——I used [Figma](https://figma.com) throughout this entire process.
 
@@ -570,13 +570,13 @@ Luckily, [@blueset](https://github.com/blueset), my team's co-founder, happens t
 
 The first font on this list, ロダン NTLG DB (Rodin New Type Labo Gothic), was the font used for nearly all UI-based text elements in-game:
 
-![Rodin Font](rodin-font.png)
+![Rodin Font](assets/rodin-font.png)
 
 Of course, the [Internet Archive](https://archive.org/download/Fontworks/) has a directory listing of almost every Fontworks font, which I used to grab Rodin's `.otf`. With this knowledge in-hand, I was able to recreate the UI elements with ease:
 
-![Figma Screenshot](figma-screenshot.png)
+![Figma Screenshot](assets/figma-screenshot.png)
 
-![Figma Project](figma-project.png)
+![Figma Project](assets/figma-project.png)
 
 All elements that I were unable to recreate due to complexity (like the character attribute icons, star rarities, banner logos, etc.) I grabbed from online wikis (e.g. [Fandom](https://projectsekai.fandom.com/wiki/Project_SEKAI_Wiki), [Sekaipedia](https://www.sekaipedia.org/wiki/Category:Game_assets)) of the game. With this undoubtedly important step out of the way, let's talk about the Unity game itself.
 
@@ -586,11 +586,11 @@ Of course, I'm no professional Unity game developer——I've only ever made a f
 
 My Unity 2D (2021.3.29f1) project was honestly just a bunch of Canvas elements layered on top of each other. Of course, there's a million better ways to do this (e.g. the new Unity UI Toolkit with dynamic modals/buttons), but since this challenge was never meant to be long-term/scalable I didn't want to overcomplexify. Here is the hierarchy structure from within the editor:
 
-![Unity Hierarchy](unity-hierarchy.png)
+![Unity Hierarchy](assets/unity-hierarchy.png)
 
 You can easily observe which GameObjects become visible/invisible throughout play; I created a GIF to demonstrate this in action:
 
-![Unity Layers](unity-layers.gif)
+![Unity Layers](assets/unity-layers.gif)
 
 For this section of the blog post, I'll be going over each individual script located within `Assets/Scripts`——conveniently, structuring the post in this manner actually fleshes out a lot of my challenge's functionality, and places the various scripts in context for later when we talk about reverse-engineering. Each script will have its own dedicated section, ordered by how important I believe they are. Let's get started!
 
@@ -763,7 +763,7 @@ Other than this, the script is pretty straightforward——if the request fails 
             }
 ```
 
-![Error Modal](error-modal.png)
+![Error Modal](assets/error-modal.png)
 
 > 接続エラー： サーバーに接続できませんでした (または不正なペイロー ドが送信されました!) 通貨は使われていません。  
 > Connection Error: could not connect to the server (or an invalid payload was sent)! No currency was spent.
@@ -1410,19 +1410,19 @@ I know this looks intensely overwhelming, but it's just because all of these dif
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `public void Start(){:cs}`                             | We can totally ignore [`MonoBehaviour.Start(){:cs}`](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) because it just consists of a bunch of `AddListener(){:cs}` calls to the various buttons in the game. I could have mitigated this by using the Unity GUI's `OnClick(){:cs}` functionality for buttons to directly call the appropriate methods, but out of personal preference I chose to do it this way.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `public void UpdateUI(){:cs}`                          | Genuinely just a one-liner. The only reason why it's its own public method is because `GachaManager{:cs}` calls it when it finishes up a successful request.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `public void MusicVolume(){:cs}`                       | Used in the volume sliders in `menuModal{:cs}`. Utilizes the `AudioController{:cs}` (which we'll go over later) to adjust sounds: ![Volume Sliders](volume-sliders.png) Also plays a little sound effect which changes pitch depending on the direction the slider is moving. Of course, since we don't want the sound effect to be spammed per tick of the slider, I added a cooldown.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `public void MusicVolume(){:cs}`                       | Used in the volume sliders in `menuModal{:cs}`. Utilizes the `AudioController{:cs}` (which we'll go over later) to adjust sounds: ![Volume Sliders](assets/volume-sliders.png) Also plays a little sound effect which changes pitch depending on the direction the slider is moving. Of course, since we don't want the sound effect to be spammed per tick of the slider, I added a cooldown.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `public void SFXVolume(){:cs}`                         | Same thing as `MusicVolume(){:cs}` except for SFX.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `public void ExitGame(){:cs}`                          | Also a one-liner: `Application.Quit(){:cs}`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `public void OnPullButtonClick(){:cs}`                 | **Parameters**: `int cost, int numPulls{:cs}`<br />Opens the `pullConfirmationModal{:cs}` and changes the various TextMeshPro objects inside to be accurate (changes the color of `currentCrystalsText{:cs}` to red and disables `pullConfirmationContinueButton{:cs}` if the user doesn't have enough crystals): ![Confirmation Modal](confirmation-modal.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `public void GenericModalHandler(){:cs}`               | **Parameters**: `GameObject modal, Button closeButton{:cs}`<br />Plays the default zoom-in/zoom-out animations, sound effects, and enables darkened background whenever a modal is opened via button: ![Modal Handler](modal-handler.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `public void OnPullButtonClick(){:cs}`                 | **Parameters**: `int cost, int numPulls{:cs}`<br />Opens the `pullConfirmationModal{:cs}` and changes the various TextMeshPro objects inside to be accurate (changes the color of `currentCrystalsText{:cs}` to red and disables `pullConfirmationContinueButton{:cs}` if the user doesn't have enough crystals): ![Confirmation Modal](assets/confirmation-modal.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `public void GenericModalHandler(){:cs}`               | **Parameters**: `GameObject modal, Button closeButton{:cs}`<br />Plays the default zoom-in/zoom-out animations, sound effects, and enables darkened background whenever a modal is opened via button: ![Modal Handler](assets/modal-handler.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `public IEnumerator DisplaySplashArt(){:cs}`           | **Parameters**: `Character[] characters{:cs}`<br />Whenever you pull for characters in Project Sekai, a "carousel" of "splash art" representing each character appears one-by-one on your screen until you've cycled through everything you've pulled. This method handles the entire process by cycling through the `Character[]{:cs}` array and calling the following `Display____StarCharacter(){:cs}` coroutines (will be referred to as "splash art coroutines" from here for brevity). It pauses the iteration through the loop (via `WaitUntil(() => CheckForSkipOrClick(characters, i)){:cs}`) until the user clicks after the aforementioned coroutine is completed.                                                                                                                                                                                            |
-| `private IEnumerator DisplayTwoStarCharacter(){:cs}`   | **Parameters**: `Character character{:cs}`<br />Handles the animations and sound effects for a two-star splash art. Since I chose to animate using the seriously outdated legacy Animation component (I was too lazy to learn the new Animator), I had to trigger the animations through code. It's seriously ugly, but for such a small use case like this I didn't find it necessary: ![Two Star Animation](two-star-animation.gif) The script replaces every pixel in the initial splash art with a static color representing the character (Kohane's is `#FF679A{:cs}`) to create a silhouette, and uses a moving mask to achieve a "wiping" animation on top of the silhouette. The silhouette then moves diagonally to create a shadow. The background triangle movement was achieved using the `BackgroundScroller.cs{:cs}` file, which will be overviewed later. |
-| `private IEnumerator DisplayThreeStarCharacter(){:cs}` | **Parameters**: `Character character{:cs}`<br />Handles three-star splash art. Since splash art for this rarity takes up the entire screen instead of using a small silhouette, I had to give it different treatment (and therefore different animations): ![Three Star Animation](three-star-animation.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `private IEnumerator DisplayTwoStarCharacter(){:cs}`   | **Parameters**: `Character character{:cs}`<br />Handles the animations and sound effects for a two-star splash art. Since I chose to animate using the seriously outdated legacy Animation component (I was too lazy to learn the new Animator), I had to trigger the animations through code. It's seriously ugly, but for such a small use case like this I didn't find it necessary: ![Two Star Animation](assets/two-star-animation.gif) The script replaces every pixel in the initial splash art with a static color representing the character (Kohane's is `#FF679A{:cs}`) to create a silhouette, and uses a moving mask to achieve a "wiping" animation on top of the silhouette. The silhouette then moves diagonally to create a shadow. The background triangle movement was achieved using the `BackgroundScroller.cs{:cs}` file, which will be overviewed later. |
+| `private IEnumerator DisplayThreeStarCharacter(){:cs}` | **Parameters**: `Character character{:cs}`<br />Handles three-star splash art. Since splash art for this rarity takes up the entire screen instead of using a small silhouette, I had to give it different treatment (and therefore different animations): ![Three Star Animation](assets/three-star-animation.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `private IEnumerator DisplayFourStarCharacter(){:cs}`  | **Parameters**: `Character character{:cs}`<br />Will be revealed when solving the challenge!                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `private IEnumerator SetInactiveAfterDelay(){:cs}`     | **Parameters**: `GameObject gameObject, float delay{:cs}`<br />Just a simple utility method which is typically called when closing a modal. Since we want the closing animation to play (rather than disabling the modal immediately), we wait a little bit before setting it to inactive.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `private void UpdateSplashArtImage(){:cs}`             | **Parameters**: `string splashArt, Image image{:cs}`<br />Changes the image after each iteration through the splash art carousel, called at the beginning of every splash art coroutine.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `private void UpdateSilhouetteImage(){:cs}`            | **Parameters**: `string splashArt{:cs}`<br />Replaces each pixel within a splash art to create a silhouette of solid color. Called in `DisplayTwoStarCharacter(){:cs}`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `private void DisplayAvatars(){:cs}`                   | **Parameters**: `Character[] characters{:cs}`<br />Handles the instantiation/destruction of `avatarImages{:cs}` within the Grid Layout Group component of `gachaOverviewCanvas{:cs}`: ![Gacha Overview](gacha-overview.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `private void DisplayAvatars(){:cs}`                   | **Parameters**: `Character[] characters{:cs}`<br />Handles the instantiation/destruction of `avatarImages{:cs}` within the Grid Layout Group component of `gachaOverviewCanvas{:cs}`: ![Gacha Overview](assets/gacha-overview.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `private void SetImageOpacity(){:cs}`                  | **Parameters**: `MaskableGraphic image, float targetOpacity{:cs}`<br />Utility method exclusively for `ResetAnimations(){:cs}`. Used to set transparency to 0 when resetting animations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `private void DisplayGachaOverview(){:cs}`             | Disables and enables all the appropriate layers and plays the correct sound effects during the transition to the gacha overview page (the grid layout screen with avatars of all the characters you've pulled). Fades the looping music in the background into a different song.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `private void OnSkipButtonClick(){:cs}`                | Skips the splash art carousel (via `StopAllCoroutines(){:cs}`) and goes straight to the gacha overview screen.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -1440,13 +1440,13 @@ And we're done! See, it wasn't _too_ bad, right?
 
 An extremely undervalued aspect of video games which give them that beautiful polish is sound design. Of course, I'm not the one creating the sound effects themselves; that's an entirely different universe. For sound effects in this challenge, I scoured through some online asset rips of the official game: [sekai.best](https://sekai.best/asset_viewer/sound/system/)'s asset viewer, and the [pjsek.ai](https://pjsek.ai/assets) database:
 
-![Sekai.best Asset Viewer](sekai-best-asset-viewer.png)
+![Sekai.best Asset Viewer](assets/sekai-best-asset-viewer.png)
 
-![PJSekai Database](pjsekai-database.png)
+![PJSekai Database](assets/pjsekai-database.png)
 
 Any SFX assets I weren't able to find I ended up taking from the game itself——I ended up taking a screen recording of me pulling the gacha and cutting out the various sound effects I heard (with the music volume at 0%). From this, alongside recordings of people fiddling with the gacha system on YouTube, I was able to deduce which sound effects needed to be triggered when. I finished off the recordings with a bit of post-processing in Audacity:
 
-![Audacity](audacity.png)
+![Audacity](assets/audacity.png)
 
 The `AudioController.cs` itself first needs a class `Sound{:cs}`, which defines an `AudioClip{:cs}` with a name:
 
@@ -1601,7 +1601,7 @@ public class AudioController : MonoBehaviour
 
 With this, we can now freely drag audio clips into the audio controller, rename them, and call them on a whim from any of our other scripts, like our `UIManager.cs`:
 
-![Audio Inspector](audio-inspector.png)
+![Audio Inspector](assets/audio-inspector.png)
 
 ```cs title="Assets/Scripts/UIManager.cs" caption="Audio Controller Usage" showLineNumbers{433} skip{435-444} {14,16}
     private void DisplayGachaOverview()
@@ -1650,7 +1650,7 @@ public class BackgroundScroller : MonoBehaviour
 }
 ```
 
-![Background Scroll](background-scroll.gif)
+![Background Scroll](assets/background-scroll.gif)
 
 This only works if the image asset itself has a Wrap Mode of "Repeat" (instead of "Clamp").
 
@@ -1660,7 +1660,7 @@ This only works if the image asset itself has a Wrap Mode of "Repeat" (instead o
 
 The [Prefab](https://docs.unity3d.com/Manual/Prefabs.html) system was utilized to create a reusable component for every button, containing interactive transition colors and a script which handled the button's shrinking/expanding animations on-click:
 
-![Unity Prefab](unity-prefab.png)
+![Unity Prefab](assets/unity-prefab.png)
 
 ```cs title="Assets/Scripts/ShrinkButton.cs" caption="Shrink Button Script" showLineNumbers
 using System.Collections;
@@ -1737,7 +1737,7 @@ public class ShrinkButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
 This is the resulting behavior:
 
-![Shrink Button](shrink-button.gif)
+![Shrink Button](assets/shrink-button.gif)
 
 ---
 
@@ -1745,7 +1745,7 @@ This is the resulting behavior:
 
 These two scripts were adopted from the [`wmjoers/CameraScaler`](https://github.com/wmjoers/CameraScaler) repository, which provided fixes to bad aspect ratios on standalone 2D unity bundles. Think of it as converting an image in CSS from `object-fit: cover{:css}` to `object-fit: contain{:css}`, so that the game camera itself preserves its aspect ratio even when the game window is altered:
 
-![Fullscreen Fix](fullscreen-fix.gif)
+![Fullscreen Fix](assets/fullscreen-fix.gif)
 
 ```cs title="Assets/Scripts/CameraScaler.cs" caption="Camera Scaler Script" showLineNumbers
 using UnityEngine;
@@ -1913,21 +1913,21 @@ Since we have a lot of context now on how the game is made and the various scrip
 > But alas, it's never enough. The odds are miniscule, the rates are rigged, the gacha system is a predatory sham.
 > It feels like I've pulled a million times and I still haven't gotten her! Do the gacha gods not pity me?!
 >
-> ![In-game screenshot of gacha banner](initial-launch.png)
+> ![In-game screenshot of gacha banner](assets/initial-launch.png)
 
 </Challenge>
 
 We're initially provided with a `dist/` folder with the following structure:
 
-![Initial Folder Structure](initial-folder-structure.svg)
+![Initial Folder Structure](assets/initial-folder-structure.svg)
 
 Opening up the executable in Windows will reveal a video game titled "Azusawa's Gacha World", which is revealed to be generated by Unity from the splash image that appears on-load:
 
-![Initial Launch](initial-launch.png)
+![Initial Launch](assets/initial-launch.png)
 
 It's... an entirely Japanese gacha game! We can totally pull on the gacha with our 100 crystals to start off with, but we quickly realize that this entire system is rigged from the second button on the bottom left (which reads ガチャ詳細 -> "Gacha Details"):
 
-![Gacha Details](gacha-details.png)
+![Gacha Details](assets/gacha-details.png)
 
 We can see that we were provided a list of percentages, which indicate the chance that each rarity of character will be dropped. The top rarity, the bow icon, indicates a "special" rarity of character that has a 0% chance of dropping from the pool.
 
@@ -1940,15 +1940,15 @@ Of course, this means that we would need to pull a million times to get our desi
 
 Let's use [dnSpy v6.1.8](https://github.com/dnSpy/dnSpy) to our advantage here to reverse engineer the game. Since all Unity-compiled C# code goes into an `Assembly-CSharp.dll` within the `dist/Asusawa's Gacha World_Data/Managed` directory, we should be analyzing this file first and foremost. Opening dnSpy and dragging the DLL into the program will reveal the following structure:
 
-![Initial dnSpy](initial-dnspy.png)
+![Initial dnSpy](assets/initial-dnspy.png)
 
 Sifting through the code, the most relevant script out of all seems to be a `GachaManager.cs`, which creates `POST` requests to a backend server of some kind. We find a suspicious string near the top of the `CreateGachaWebRequest(){:cs}` method:
 
-![Suspicious String](suspicious-string.png)
+![Suspicious String](assets/suspicious-string.png)
 
 Deobfuscating this string with a simple base64 decoder reveals the following IP address, which is the endpoint that the game is sending requests to:
 
-![Decode Base64](decode-base64.png)
+![Decode Base64](assets/decode-base64.png)
 
 Let's figure out the structure that the game is sending to the server. Let's take a closer look at the `CreateGachaWebRequest(){:cs}` method:
 
@@ -1997,7 +1997,7 @@ We can see that `SetRequestHeader(){:cs}` is being called to add some custom hea
 
 We can see that a new `GachaRequest{:cs}` is being created with the parameters `this.gameState.crystals{:cs}`, `this.gameState.pulls{:cs}`, and `numPulls{:cs}`. Since we can edit and recompile assemblies with dnSpy, let's change the parameters being sent to `GachaRequest{:cs}` to something static. We can change the `this.gameState.crystals{:cs}` parameter to something large, like 10,000,000, and the `this.gameState.pulls{:cs}` parameter to something close to 1,000,000——let's say 999,999. Right click the method and click "Edit Method (C#)..." to change the parameters:
 
-![Recompiling DLL](recompiling-dll.png)
+![Recompiling DLL](assets/recompiling-dll.png)
 
 ```cs title="Assembly-CSharp.dll" caption="Modifying GachaRequest Parameters" showLineNumbers
 using System;
@@ -2038,7 +2038,7 @@ public partial class GachaManager : MonoBehaviour
 
 After fixing some minor errors, we can recompile the DLL and save it over the original one, which will successfully modify our in-game parameters. Let's try pulling again:
 
-![Flag GIF](flag.gif)
+![Flag GIF](assets/flag.gif)
 
 ---
 

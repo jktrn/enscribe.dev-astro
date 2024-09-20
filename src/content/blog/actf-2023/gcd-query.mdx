@@ -1,9 +1,9 @@
 ---
 title: 'Chinese Remainder Theorem, Carnival Games and 2048-bit Integers'
-description: "Ever wanted to guess an integer that's 617 digits long? Well, I did. Here's how I did it using ancient abacus math (Chinese Remainder Theorem)."
+description: "Guessing a 617-digit integer using ancient math! A journey through number theory, carnival games, and cryptography in AmateursCTF 2023."
 date: 2023-07-24
 tags: ['programming', 'algorithm']
-image: 'banner.webp'
+image: 'assets/banner.webp'
 authors: ['enscribe']
 ---
 
@@ -16,14 +16,9 @@ High school CTF team [View Source](https://ctftime.org/team/175828) and I partic
 
 ---
 
-<div className="invisible !h-0">
-
 ## gcd-query-v1
 
-</div>
-
 <Challenge
-  title="gcd-query-v1"
   authors={['skittles1412']}
   solvers={[
     {
@@ -70,20 +65,20 @@ Let's go over step-by-step what this server is up to:
 
 - For ten iterations, a long `x{:py}` is created by pycrypto's [`getRandomInteger(n){:py}`](https://pythonhosted.org/pycrypto/Crypto.Util.number-module.html#getRandomInteger), which returns a random integer with up to $n$ bits in length. $n = 2048$; this is an absolutely mindbendingly large number——up to 617 digits long! You absolutely do not want to see what 617 digits looks like in decmimal:
 
-![2048-bit Visual](2048.svg)
+![2048-bit Visual](assets/2048.svg)
 
 - For each iteration of `x{:py}`, the user gets prompted to enter two integers `n{:py}` and `m{:py}`. Once the assertion that `m > 0{:py}` is passed, `n{:py}` and `m{:py}` are passed into a function `gcd(x + n, m){:py}`, which returns the **greatest common divisor** of `x + n{:py}` and `m{:py}`. This occurs for 1412 iterations.
 - After the iterations have completed, the user is then prompted to guess the value of `x{:py}`. If the guess is correct, the next iteration of `x{:py}` begins. This process is repeated nine more times until the flag is printed.
 
 Here is a quick visual depicting what's going on:
 
-![Source Code Graphical Visualization](visualization.svg)
+![Source Code Graphical Visualization](assets/visualization.svg)
 
 Paying close attention to the right side of this graphic, we can see that there's only a couple specific points at which we can interact with the server: when we pick the `n{:py}` and `m{:py}` to send, and when we guess the value of `x{:py}`. The question now is: what values should we be picking for `n{:py}` and `m{:py}` which reveal the most information about `x{:py}`, and how do we use this information to obtain its actual value?
 
 ### The Chinese Remainder Theorem
 
-<InfoBox type="info" title="Recall">
+<InfoBox type="info">
 **Recall**: The *modulus* is the remainder of [Euclidian division](https://en.wikipedia.org/wiki/Euclidean_division) (division with remainder) of one number by another. For example, $$2 = 12 \pmod{5}$$.
 
 However, this is different from the **congruence modulo** relation, represented by the congruence symbol $$\equiv$$ and often expressed as $$a \equiv b \pmod{m}$$. When two numbers $$a$$ and $$b$$ are congruent modulo $$m$$, it means that:
@@ -134,7 +129,7 @@ You may be asking: what the hell does this have to do with guessing the giant in
 
 ### Tne Modular Arithmetic Nerd's Favorite Carnival Game
 
-![Carnival Game](carnival-visual.svg)
+![Carnival Game](assets/carnival-visual.svg)
 
 Let's say little Bob over at the bottom right goes to a carnival game booth and is asked to guess a number on a ball behind the operator. Obviously, since we're omnipotent observers in this fantastical 2D universe of cute little cartoon circle people, we know that the number is $$x = 727$$. However, Bob doesn't know shit. He's really good at modular arithmetic though, so he'll have a lot of fun with this one.
 
@@ -144,7 +139,7 @@ Bob goes back to his table. He's flabbergasted. How in the world is he going to 
 
 He rummages around his little noggin and recollects himself. Let's see what he's thinking:
 
-![Bob Thinking](bob-thinking.svg)
+![Bob Thinking](assets/bob-thinking.svg)
 
 Uh... thanks, I guess? Well, he has a good point, but since I guarantee that nobody read it (because it's too long for the average CTF player's attention span) I'll give a brief TL;DR here.
 
@@ -221,7 +216,7 @@ print(primorial)
 
 Bob's now ready to go! He walks up to the operator and hands him his pieces of paper. The operator hastily hands him back three pieces of paper with the resulting GCDs:
 
-![Bob Handing Papers](handing-papers.svg)
+![Bob Handing Papers](assets/handing-papers.svg)
 
 Now he knows that:
 
@@ -251,7 +246,7 @@ print(crt(moduli, remainders)[0] if crt(moduli, remainders) else None)
 
 Bob's got the number! Congratulations, Bob!
 
-![Congrats, Bob!](congrats-bob.svg)
+![Congrats, Bob!](assets/congrats-bob.svg)
 
 ### Implementation
 
@@ -330,14 +325,9 @@ We've solved `gcd-query-v1`!
 
 ---
 
-<div className="invisible !h-0">
-
 ## gcd-query-v2
 
-</div>
-
 <Challenge
-  title="gcd-query-v2"
   authors={['hellopir']}
   solvers={[
     {

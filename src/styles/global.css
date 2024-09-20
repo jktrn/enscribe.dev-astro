@@ -89,12 +89,14 @@
     @apply prose-a:!text-primary prose-a:!decoration-primary/50 prose-a:!underline-offset-[3px] prose-a:transition-colors hover:prose-a:!decoration-inherit;
     @apply prose-blockquote:!not-italic prose-blockquote:!text-muted-foreground;
     @apply prose-pre:!px-0;
-    @apply prose-img:mx-auto prose-img:rounded-md prose-img:border;
+    @apply prose-img:mx-auto prose-img:rounded-xl prose-img:border;
 
+    /* Fixing Katex display */
     .katex-display {
       @apply overflow-x-auto overflow-y-hidden py-4;
     }
 
+    /* Fixing Katex fractions */
     .frac-line {
       @apply border-foreground;
     }
