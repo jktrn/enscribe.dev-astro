@@ -38,8 +38,8 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
   <Container class="flex grow flex-col gap-y-6">
     <Breadcrumbs
       items={[
-        { label: 'Blog', href: '/blog' },
-        { label: `Page ${page.currentPage}` },
+        { label: 'Blog', href: '/blog', icon: 'lucide:archive' },
+        { label: `Page ${page.currentPage}`, icon: 'lucide:folder-open' },
       ]}
     />
 

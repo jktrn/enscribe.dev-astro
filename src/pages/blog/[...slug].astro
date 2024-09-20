@@ -61,7 +61,10 @@ const authors = await parseAuthors(post.data.authors ?? [])
 >
   <Container class="flex flex-col gap-y-6">
     <Breadcrumbs
-      items={[{ href: '/blog', label: 'Blog' }, { label: post.data.title }]}
+      items={[
+        { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
+        { label: post.data.title, icon: 'lucide:file-text' },
+      ]}
     />
 
     {
