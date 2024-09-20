@@ -2,7 +2,7 @@
 import '../styles/global.css'
 import '../styles/katex.css'
 
-import { SITE } from '@consts'
+import { SITE } from '@/consts'
 import { ViewTransitions } from 'astro:transitions'
 
 interface Props {
@@ -19,7 +19,7 @@ const { title, description, image = '/static/twitter-card.png' } = Astro.props
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="generator" content={Astro.generator} />
-<base target="_blank" />
+<meta name="google" content="notranslate" />
 
 <link rel="canonical" href={canonicalURL} />
 <link rel="sitemap" href="/sitemap-index.xml" />

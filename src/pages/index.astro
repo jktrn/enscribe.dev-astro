@@ -1,4 +1,7 @@
 ---
+import BlogCard from '@/components/BlogCard.astro'
+import Container from '@/components/Container.astro'
+import Link from '@/components/Link.astro'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
@@ -7,11 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import BlogCard from '@components/BlogCard.astro'
-import Container from '@components/Container.astro'
-import Link from '@components/Link.astro'
-import { SITE } from '@consts'
-import Layout from '@layouts/Layout.astro'
+import { SITE } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
 import { getCollection } from 'astro:content'
 
 const blog = (await getCollection('blog'))
@@ -37,30 +37,37 @@ const blog = (await getCollection('blog'))
             built with <Link
               href="https://astro.build"
               class="text-foreground"
-              underline>Astro</Link
+              underline
+              external>Astro</Link
             >, <Link
               href="https://tailwindcss.com"
               class="text-foreground"
-              underline>Tailwind</Link
+              underline
+              external>Tailwind</Link
             >, and <Link
               href="https://ui.shadcn.com"
               class="text-foreground"
-              underline>shadcn/ui</Link
+              underline
+              external>shadcn/ui</Link
             >. Extraordinarily loosely based on the <Link
               href="https://astro-micro.vercel.app/"
               class="text-foreground"
-              underline>Astro Micro</Link
+              underline
+              external>Astro Micro</Link
             > theme.
           </p>
           <p class="text-sm text-muted-foreground">
             To use this template, check out the <Link
               href="https://github.com/jktrn/astro-erudite"
-              class="text-foreground">GitHub</Link
+              class="text-foreground"
+              underline
+              external>GitHub</Link
             > repository. To learn more about why this template exists, read this
             blog post: <Link
               href="/blog/the-state-of-static-blogs"
               class="text-foreground"
-              underline>The State of Static Blogs in 2024</Link
+              underline
+              external>The State of Static Blogs in 2024</Link
             >.
           </p>
         </CardContent>

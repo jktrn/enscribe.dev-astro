@@ -1,9 +1,9 @@
 ---
+import AuthorCard from '@/components/AuthorCard.astro'
+import BlogCard from '@/components/BlogCard.astro'
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import AuthorCard from '@components/AuthorCard.astro'
-import BlogCard from '@components/BlogCard.astro'
-import Container from '@components/Container.astro'
-import Layout from '@layouts/Layout.astro'
+import Container from '@/components/Container.astro'
+import Layout from '@/layouts/Layout.astro'
 import { type CollectionEntry, getCollection } from 'astro:content'
 
 export async function getStaticPaths() {

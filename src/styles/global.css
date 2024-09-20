@@ -22,7 +22,7 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
-    --primary: 34 54% 81%;
+    --primary: 34 54% 50%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 80.1%;
     --secondary-foreground: 0 0% 9%;
@@ -84,7 +84,12 @@
 
 @layer components {
   article {
-    @apply prose-headings:scroll-mt-20 prose-headings:break-words prose-p:break-words prose-a:!text-primary prose-blockquote:!not-italic prose-blockquote:!text-muted-foreground prose-pre:!px-0 prose-img:mx-auto prose-img:rounded-md prose-img:border;
+    @apply prose-headings:scroll-mt-20 prose-headings:break-words;
+    @apply prose-p:break-words;
+    @apply prose-a:!text-primary prose-a:!decoration-primary/50 prose-a:!underline-offset-[3px] prose-a:transition-colors hover:prose-a:!decoration-inherit;
+    @apply prose-blockquote:!not-italic prose-blockquote:!text-muted-foreground;
+    @apply prose-pre:!px-0;
+    @apply prose-img:mx-auto prose-img:rounded-md prose-img:border;
 
     .katex-display {
       @apply overflow-x-auto overflow-y-hidden py-4;

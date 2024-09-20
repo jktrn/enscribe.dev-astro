@@ -1,10 +1,11 @@
 ---
-import { cn } from '@lib/utils'
+import { cn } from '@/lib/utils'
 
 type Props = {
   href: string
   class?: string
   underline?: boolean
+  external?: boolean
   'data-heading'?: string
   [key: string]: any
 }
@@ -16,9 +17,13 @@ const { href, external, class: className, underline, ...rest } = Astro.props
   href={href}
   class={cn(
     'inline-block transition-colors duration-300 ease-in-out',
-    underline && 'underline underline-offset-[3px]',
+    underline &&
+      'underline decoration-muted-foreground underline-offset-[3px] hover:decoration-foreground',
     className,
   )}
+  {...external
+    ? { target: '_blank', rel: 'noopener noreferrer' }
+    : { target: '_self' }}
   {...rest}
 >
   <slot />

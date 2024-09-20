@@ -1,7 +1,7 @@
 ---
+import Link from '@/components/Link.astro'
 import AvatarComponent from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import Link from '@components/Link.astro'
 import { CheckCircle, FileText, PenTool, Star, Tag, Users } from 'lucide-react'
 
 interface Solver {
@@ -43,7 +43,11 @@ const {
           </div>
           <div class="flex flex-1 flex-wrap gap-2">
             {solvers.map((solver) => (
-              <Link href={solver.href} class="flex items-center gap-x-1">
+              <Link
+                href={solver.href}
+                class="flex items-center gap-x-1"
+                external
+              >
                 <AvatarComponent
                   client:load
                   src={solver.avatar}

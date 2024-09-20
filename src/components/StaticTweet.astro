@@ -35,7 +35,7 @@ const { avatar, username, handle, date, src, media, video } = Astro.props
         <span class="opacity-80">{date}</span>
       </div>
     </span>
-    <Link href={src} class="text-primary">
+    <Link href={src} class="text-primary" external>
       <Twitter />
     </Link>
   </div>
