@@ -9,6 +9,9 @@ authors: ['enscribe']
 
 import Challenge from '@/components/mdx/Challenge.astro'
 import InfoBox from '@/components/mdx/InfoBox.astro'
+import Flag3Video from './assets/flag3.mp4'
+import Flag4Video from './assets/flag4.mp4'
+import Flag5Video from './assets/solve-cut.mp4'
 
 ## Intro
 
@@ -29,7 +32,7 @@ This was the first CTF problem which didn't just challenge my ability to critica
       avatar: 'https://github.com/blueset.png',
     },
     {
-      name: 'jktrn',
+      name: 'enscribe',
       href: 'https://github.com/jktrn',
       avatar: 'https://github.com/jktrn.png',
     },
@@ -581,55 +584,50 @@ const passwords = [{
         </div>
 ```
 
-{/*
-
-
-<CodeBlock
-  src="dhhutc-2022/2-adding-html"
-  language="html"
-  fileName="index.html"
-  title="Adding Level 2 button"
-  range={[[3, 8]]}
-  addedLines={[[7, 7]]}
-/>
-
 This is what appears when clicking the button:
 
 ![Level 2](assets/level2.gif)
 
 Looks like we'll have to add two more steer buttons:
 
-<CodeBlock
-  src="dhhutc-2022/2-more-buttons"
-  language="html"
-  fileName="index.html"
-  title="Adding steer buttons"
-  range={[[9, 15]]}
-  addedLines={[[12, 13]]}
-/>
+```html title="index.html" caption="Adding steer buttons" showLineNumbers{9}
+<p>Steer Ships:</p>
+        <div>
+            <button id="steer0">Steer 0</button>
+            <button id="steer1">Steer 1</button> <!-- [!code ++] -->
+            <button id="steer2">Steer 2</button> <!-- [!code ++] -->
+        </div>
+</fieldset>
+```
 
 It seems as though that you also need the ships to enter in a specific order. It will be difficult to multitask all three, but it's doable! Let's try to solve it (also very sped up):
 
 ![Flag 2](assets/flag2.gif)
 
-<CodeBlock src="dhhutc-2022/2-flag" rawHTML terminal />
+```text
+...
+ID: 0 | (789, 105) (849, 294) | DIR: UP
+ID: 1 | (796, 105) (856, 373) | DIR: UP
+ID: 2 | (691, 108) (751, 389) | DIR: UP
+{"type":"WIN","flag":"CTF{capt41n-h00k!}"}
+```
 
 Although we've solved level 2 manually, I have a gut feeling the next few ones won't be as trivial...
 
 ---
 
-<div className="invisible !h-0">
-
 ### Level 3
 
-</div>
-
 <Challenge
-  title="Level 3"
-  solvers="sahuang"
-  points="50"
-  description="Can you deal with the rocks that appeared in our once so peaceful harbor?"
-/>
+  solvers={[{
+    name: 'sahuang',
+    href: 'https://github.com/sahuang',
+    avatar: 'https://github.com/sahuang.png',
+  }]}
+  points={50}
+>
+  Can you deal with the rocks that appeared in our once so peaceful harbor?
+</Challenge>
 
 After adding another button to start Level 3, this is the field we start with:
 
@@ -639,28 +637,58 @@ They added some rocks to the board, and the ships are now moving at a faster spe
 
 Here's the plan: let's make it so that these ships will constantly rotate at a certain interval - in doing so, they'll complete a 360° loop within a small area, and we can commandeer them one-at-a-time by disabling the loop for certain ships. Let's start by adding checkboxes to enable the loop:
 
-<CodeBlock
-  src="dhhutc-2022/3-loop-toggle"
-  language="html"
-  fileName="index.html"
-  title="Adding loop checkboxes"
-  range={[[10, 22]]}
-  addedLines={[[16, 21]]}
-/>
+```html title="index.html" caption="Adding loop checkboxes" showLineNumbers{10}
+    <p>Steer Ships:</p>
+    <div>
+        <button id="steer0">Steer 0</button>
+        <button id="steer1">Steer 1</button>
+        <button id="steer2">Steer 2</button>
+    </div>
+    <p>Loop Ships:</p> <!-- [!code ++] -->
+    <div> <!-- [!code ++] -->
+        <input type="checkbox" id="loop0" checked>Loop 0</input> <!-- [!code ++] -->
+        <input type="checkbox" id="loop1" checked>Loop 1</input> <!-- [!code ++] -->
+        <input type="checkbox" id="loop2" checked>Loop 2</input> <!-- [!code ++] -->
+    </div> <!-- [!code ++] -->
+</fieldset>
+```
 
-Regarding the JavaScript, I'll be using `performance.now()` and checking if the difference between it and `window.lastRot` is greater than 500ms. This check will happen every tick, and in theory will create a consistently steering ship that doesn't produce `"ILLEGAL_MOVE"`s for inputting too quickly:
+Regarding the JavaScript, I'll be using `performance.now(){:js}` and checking if the difference between it and `window.lastRot{:js}` is greater than 500ms. This check will happen every tick, and in theory will create a consistently steering ship that doesn't produce `"ILLEGAL_MOVE"{:js}`s for inputting too quickly:
 
-<CodeBlock
-  src="dhhutc-2022/3-looped-rotations"
-  language="javascript"
-  fileName="solve.js"
-  title="Implementing looped rotations"
-  range={[[40, 71]]}
-  addedLines={[
-    [40, 40],
-    [59, 70],
-  ]}
-/>
+```js title="solve.js" caption="Implementing looped rotations" showLineNumbers{40}
+window.lastRot = 0; // [!code ++]
+
+// Runs when output from server is received
+socket.onmessage = function (event) {
+    // Converts server output into object
+    let obj = JSON.parse(event.data);
+    if (obj.type == "TICK") {
+        let ships = [];
+        // For each ship in obj.ships, push class object into ships array
+        for (const i of obj.ships) {
+            ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
+        }
+        // Call the string literal getter
+        for (const i of ships) {
+            log(i.printState);
+        }
+    } else {
+        log(JSON.stringify(JSON.parse(event.data)));
+    }
+    // Guard clause for looping ships! // [!code ++]
+    if (performance.now() - window.lastRot < 500) return; // [!code ++]
+    window.lastRot = performance.now(); // [!code ++]
+    // Sends steer if checkbox is checked // [!code ++]
+    findAll("loop").forEach(function (element, index) { // [!code ++]
+        if (element.checked) { // [!code ++]
+            socket.send(JSON.stringify({ // [!code ++]
+                type: "SHIP_STEER", // [!code ++]
+                shipId: `${index}` // [!code ++]
+            })); // [!code ++]
+        } // [!code ++]
+    }); // [!code ++]
+};
+```
 
 Let's see if it works:
 
@@ -669,26 +697,32 @@ Let's see if it works:
 We've managed to stabilize the playing field for a manual solve! Let's flag the level:
 
 <video className="my-4 rounded-md" controls>
-  <source src="assets/flag3.mp4" type="video/mp4" />
+  <source src={Flag3Video} type="video/mp4" />
   Your browser does not support the video tag.
 </video>
 
-<CodeBlock src="dhhutc-2022/3-flag" rawHTML terminal />
+```text
+...
+ID: 0 | (760, 105) (820, 343) | DIR: UP
+ID: 1 | (736, 101) (796, 371) | DIR: UP
+ID: 2 | (742, 113) (802, 393) | DIR: UP
+{"type":"WIN","flag":"CTF{c4pt41N-m0rG4N}"}
+```
 
 ---
 
-<div className="invisible !h-0">
-
 ### Level 4
 
-</div>
-
 <Challenge
-  title="Level 4"
-  solvers="sahuang"
-  points="50"
-  description="The algorithm disturbed our radar system - boats that veer too far off track are lost and never seen again. Can you give them directions in time?"
-/>
+  solvers={[{
+    name: 'sahuang',
+    href: 'https://github.com/sahuang',
+    avatar: 'https://github.com/sahuang.png',
+  }]}
+  points={50}
+>
+  The algorithm disturbed our radar system - boats that veer too far off track are lost and never seen again. Can you give them directions in time?
+</Challenge>
 
 After I added the level 4 button alongside steer/loop buttons for the extra ship that popped up, I discovered that my solution for level 3 actually worked for level 4 as well:
 
@@ -697,26 +731,37 @@ After I added the level 4 button alongside steer/loop buttons for the extra ship
 This means I can flag this level without needing to code at all!:
 
 <video className="my-4 rounded-md" controls>
-  <source src="assets/flag4.mp4" type="video/mp4" />
+  <source src={Flag4Video} type="video/mp4" />
   Your browser does not support the video tag.
 </video>
 
-<CodeBlock src="dhhutc-2022/4-flag" rawHTML terminal />
+```text
+...
+ID: 0 | (742, 107) (802, 345) | DIR: UP
+ID: 1 | (731, 105) (791, 385) | DIR: UP
+ID: 2 | (752, 107) (812, 377) | DIR: UP
+ID: 3 | (731, 114) (791, 395) | DIR: UP
+{"type":"WIN","flag":"CTF{C4pt41N-4MErIc4}"}
+```
 
 ---
 
-<div className="invisible !h-0">
-
 ### Level 5
 
-</div>
-
 <Challenge
-  title="Level 5"
-  solvers={['jktrn', 'sahuang']}
-  points="200"
-  description="A huge influx of ships is coming our way - can you lead them safely to the port?"
-/>
+  solvers={[{
+    name: 'enscribe',
+    href: 'https://github.com/jktrn',
+    avatar: 'https://github.com/jktrn.png',
+  }, {
+    name: 'sahuang',
+    href: 'https://github.com/sahuang',
+    avatar: 'https://github.com/sahuang.png',
+  }]}
+  points={200}
+>
+  A huge influx of ships is coming our way - can you lead them safely to the port?
+</Challenge>
 
 Oh boy...
 
@@ -727,13 +772,19 @@ Level five gives us a large increase in rocks, a tiny harbor, and six total ship
 Luckily, during some experimenation on level 1 I found out that you can actually do a full 180° turn by calling two consecutive turns in the code. In doing so, the ship won't hit any of the objects in its surroundings as compared to if it rotated 90° twice. We can observe this phenomenon below:
 
 <div className="align-center flex flex-col justify-center gap-0 md:flex-row md:gap-4">
-  <CodeBlock
-    src="dhhutc-2022/5-180-turn"
-    language="javascript"
-    fileName="solve.js"
-    title="180° turn"
-    range={[[142, 151]]}
-  />
+  ```js title="solve.js" caption="180° turn" showLineNumbers{142}
+          function turn180(id) {
+            socket.send(JSON.stringify({
+                type: "SHIP_STEER",
+                shipId: id
+            }));
+            socket.send(JSON.stringify({
+                type: "SHIP_STEER",
+                shipId: id
+            }));
+        }
+  ```
+
   ![180° Turn](assets/180.gif)
 </div>
 
@@ -753,34 +804,158 @@ Here's a visual I drew in case you're lost. The red/green squares on the left in
 
 We can now begin programming by creating an Obstacle class and manually placing them down throughout the map. This was just a lot of trial and error, so don't worry about these coordinates feeling random:
 
-<CodeBlock
-  src="dhhutc-2022/5-obstacle-class"
-  language="javascript"
-  fileName="solve.js"
-  title="Creating obstacles"
-  range={[[48, 68]]}
-/>
+```js title="solve.js" caption="Creating obstacles" showLineNumbers{48}
+class Obstacle {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+    }
+}
+
+let obstacles = [
+    new Obstacle(450, 1060),    //1
+    new Obstacle(750, 1060),    //2
+    new Obstacle(1200, 1060),   //3
+    new Obstacle(1600, 1060),   //4
+    new Obstacle(604, 700),     //5
+    new Obstacle(1070, 600),    //6
+    new Obstacle(1730, 650),    //7
+    new Obstacle(604, 70),      //8
+    new Obstacle(674, 200),     //9
+    new Obstacle(1070, 350),    //10
+    new Obstacle(1530, 200),    //11
+    new Obstacle(1730, 300),    //12
+]
+```
 
 Next, let's create the aforementioned `hasRotated` object alongside the `check()` function, which will implement the three criteria:
 
-<CodeBlock
-  src="dhhutc-2022/5-180-check"
-  language="javascript"
-  fileName="solve.js"
-  title="Creating check() function"
-  skipLines={[[78, 151]]}
-  range={[[70, 165]]}
-/>
+```js title="solve.js" caption="Creating check() function" showLineNumbers{70} skip{78-151}
+let hasRotated = {
+    0: false,
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Checks if ship should turn 180°
+function check(ship, obstacle, direction) {
+    if (!hasRotated[ship.id] &&                         // Check 1
+        Math.abs(ship.topLeft.y - obstacle.y) < 75 &&   // Check 2
+        Math.abs(ship.topLeft.x - obstacle.x) < 75 &&   // Check 2
+        ship.direction == direction) {                  // Check 3
+        hasRotated[ship.id] = true;
+        turn180(ship.id);
+        // Sets hasRotated[ship.id] back to false in 1 second asynchronously
+        setTimeout(() => {
+            hasRotated[ship.id] = false
+        }, "1000");
+    }
+}
+```
 
 Finally, let's call the `check()` function for each index in the `ships` array. Each tick, _every single_ ship will go through these twelve checks. Although this might seem redundant, we have no way of assigning lanes to specific ships, as the IDs are randomized every time based on the order they're meant to dock. This method simply generalizes all of them, and shouldn't cause issues performance-wise:
 
-<CodeBlock
-  src="dhhutc-2022/5-lane-checks"
-  language="javascript"
-  fileName="solve.js"
-  title="Implementing lane checks"
-  range={[[86, 108]]}
-/>
+```js title="solve.js" caption="Implementing lane checks" showLineNumbers{86}
+    if (obj.type == "TICK") {
+        let ships = [];
+        // For each ship in obj.ships, push class object into ships array
+        for (const i of obj.ships) {
+            ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
+        }
+        // Call the string literal getter
+        for (const i of ships) {
+            log(i.printState);
+            // Infinite checks!
+            check(i, obstacles[0], "LEFT");
+            check(i, obstacles[1], "RIGHT");
+            check(i, obstacles[2], "LEFT");
+            check(i, obstacles[3], "RIGHT");
+            check(i, obstacles[4], "DOWN");
+            check(i, obstacles[5], "DOWN");
+            check(i, obstacles[6], "DOWN");
+            check(i, obstacles[7], "UP");
+            check(i, obstacles[8], "LEFT");
+            check(i, obstacles[9], "UP");
+            check(i, obstacles[10], "RIGHT");
+            check(i, obstacles[11], "UP");
+        }
+```
 
 In theory, these checks should cause the ships to bounce back and forth in their specific lanes. Let's check it out:
 
@@ -788,33 +963,71 @@ In theory, these checks should cause the ships to bounce back and forth in their
 
 Yes! We've managed to stabilize level 5 completely! Now, we need to be able to toggle the lanes off to manually solve the challenge. Let's add more checkboxes to the HTML and adjust the JS accordingly:
 
-<CodeBlock
-  src="dhhutc-2022/5-lane-checkboxes"
-  language="html"
-  fileName="index.html"
-  title="Adding lane checkboxes"
-  range={[[21, 39]]}
-  addedLines={[[30, 38]]}
-/>
+```html title="index.html" caption="Adding lane checkboxes" showLineNumbers{21}
+            <p>Loop Ships:</p>
+            <div>
+                <input type="checkbox" id="loop0" checked>Loop 0</input>
+                <input type="checkbox" id="loop1" checked>Loop 1</input>
+                <input type="checkbox" id="loop2" checked>Loop 2</input>
+                <input type="checkbox" id="loop3" checked>Loop 3</input>
+                <input type="checkbox" id="loop4" checked>Loop 4</input>
+                <input type="checkbox" id="loop5" checked>Loop 5</input>
+            </div>
+            <p> Disable Obstacles: </p> <!-- [!code ++] -->
+            <div> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle0">1/2</input> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle1">3/4</input> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle2">5/8</input> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle3">6/10</input> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle4">7/12</input> <!-- [!code ++] -->
+                <input type="checkbox" id="toggle5">9/11</input> <!-- [!code ++] -->
+            </div>
+        </fieldset>
+```
 
-<CodeBlock
-  src="dhhutc-2022/5-toggleable-lanes"
-  language="javascript"
-  fileName="solve.js"
-  title="Toggleable lanes"
-  scrollable
-  range={[[80, 120]]}
-  addedLines={[
-    [80, 80],
-    [96, 96],
-    [99, 100],
-    [103, 104],
-    [107, 108],
-    [111, 112],
-    [115, 116],
-    [119, 119],
-  ]}
-/>
+```js title="solve.js" caption="Toggleable lanes" showLineNumbers{80}
+let checkList = findAll("toggle"); // [!code ++]
+
+// Runs when output from server is received
+socket.onmessage = function (event) {
+    // Converts server output into object
+    let obj = JSON.parse(event.data);
+    if (obj.type == "TICK") {
+        let ships = [];
+        // For each ship in obj.ships, push class object into ships array
+        for (const i of obj.ships) {
+            ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
+        }
+        // Call the string literal getter
+        for (const i of ships) {
+            log(i.printState);
+            // Infinite checks!
+            if (!checkList[0].checked) { // [!code ++]
+                check(s, obstacles[0], "LEFT");
+                check(s, obstacles[1], "RIGHT");
+            } // [!code ++]
+            if (!checkList[1].checked) { // [!code ++]
+                check(s, obstacles[2], "LEFT");
+                check(s, obstacles[3], "RIGHT");
+            } // [!code ++]
+            if (!checkList[2].checked) { // [!code ++]
+                check(s, obstacles[4], "DOWN");
+                check(s, obstacles[7], "UP");
+            } // [!code ++]
+            if (!checkList[3].checked) { // [!code ++]
+                check(s, obstacles[5], "DOWN");
+                check(s, obstacles[9], "UP");
+            } // [!code ++]
+            if (!checkList[4].checked) { // [!code ++]
+                check(s, obstacles[6], "DOWN");
+                check(s, obstacles[11], "UP");
+            } // [!code ++]
+            if (!checkList[5].checked) { // [!code ++]
+                check(s, obstacles[8], "LEFT");
+                check(s, obstacles[10], "RIGHT");
+            }
+        }
+```
 
 Now, we can strategize on how to solve the challenge manually. Our team deduced that the most ideal order for ships would look something like this:
 
@@ -824,8 +1037,9 @@ This order allows for the first ship to enter the port within two turns, and pro
 
 Moving on, we began work on the manual solve process. It was super tedious and involved a lot of mess-ups, especially around the port area. We discovered that the window to turn into the port was extraordinarily small, leading to many runs dying to something like this:
 
-<div className="align-center flex flex-col justify-center gap-0 md:flex-row md:gap-4">
-  ![Death 1](assets/death1.png) ![Death 2](assets/death2.png)
+<div className="[&>p]:align-center [&>p]:flex [&>p]:flex-col [&>p]:justify-center [&>p]:gap-0 [&>p]:sm:flex-row [&>p]:sm:gap-4 sm:[&>p>img]:!mx-0">
+  ![Death 1](assets/death1.png)
+  ![Death 2](assets/death2.png)
 </div>
 
 We decided it'd be best if we added another obstacle to perfectly turn us into the dock every time. This time around, it would have to be a 90° turn utlizing the middle of the ship instead of the top-left, as each ship is a different length and would therefore turn at different points when within the obstacles's hitbox:
@@ -834,18 +1048,163 @@ We decided it'd be best if we added another obstacle to perfectly turn us into t
 
 Here is its implementation:
 
-<CodeBlock
-  src="dhhutc-2022/5-auto-dock"
-  language="javascript"
-  fileName="solve.js"
-  title="Implementing auto-dock"
-  range={[[65, 219]]}
-  skipLines={[
-    [70, 116],
-    [121, 202],
-  ]}
-  addedLines={[[203, 219]]}
-/>
+```js title="solve.js" caption="Implementing auto-dock" showLineNumbers{65} skip{70-116,121-202}
+    new Obstacle(1070, 350), //10
+    new Obstacle(1530, 200), //11
+    new Obstacle(1730, 300), //12
+    new Obstacle(232, 575) //13
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            if (!checkList[5].checked) {
+                check(s, obstacles[8], "LEFT");
+                check(s, obstacles[10], "RIGHT");
+            }
+            // Auto-docking obstacle
+            check90(s, obstacles[12], "LEFT");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function check90(s, o, d) { // [!code ++]
+    // Calculates middle of ship in coordinates // [!code ++]
+    let mid = Math.abs(Math.floor(s.topLeft.x + s.bottomRight.x) / 2); // [!code ++]
+    if (!hasRotated[s.id] && // [!code ++]
+        Math.abs(s.topLeft.y - o.y) < 400 && // Large y for legroom // [!code ++]
+        Math.abs(mid - o.x) < 20 && // Small x for accuracy // [!code ++]
+        s.direction == d) { // [!code ++]
+        hasRotated[s.id] = true; // [!code ++]
+        socket.send(JSON.stringify({ // [!code ++]
+            type: "SHIP_STEER", // [!code ++]
+            shipId: s.id // [!code ++]
+        })); // [!code ++]
+        setTimeout(() => { // [!code ++]
+            hasRotated[s.id] = false // [!code ++]
+        }, "1000"); // [!code ++]
+    } // [!code ++]
+} // [!code ++]
+```
 
 When you turn a ship through those rocks into the obstacle, the ship will now automatically turn to enter the dock perfectly:
 
@@ -858,25 +1217,238 @@ When you turn a ship through those rocks into the obstacle, the ship will now au
 But, finally, I got the solve run clipped here, with a small reaction 🤣:
 
 <video controls>
-  <source src="assets/solve-cut.mp4" type="video/mp4" />
+  <source src={Flag5Video} type="video/mp4" />
   <track kind="captions" />
   Your browser does not support the video tag.
 </video>
 
-<Box
-  text="**Port Authority**, Level 5: `CTF{CaPT41n-j4Ck-sp4rR0w}`"
-  type="flag"
-/>
+<InfoBox type="flag">
+  **Port Authority**, Level 5: `CTF{CaPT41n-j4Ck-sp4rR0w}`
+</InfoBox>
 
 Here is the final script:
 
-<CodeBlock
-  src="dhhutc-2022/5-final-script"
-  language="javascript"
-  fileName="solve.js"
-  title="Final script"
-  scrollable
-/>
+```js title="solve.js" caption="Final script" showLineNumbers
+// Regex so that I can freely paste the URL when the instance is changed
+const url = "https://[REDACTED].challenge.hackazon.org/";
+// Opens WebSocket connection
+const socket = new WebSocket(`wss://${url.replace(/^https?:\/\//, "")}ws`);
+// Object literal for level lookup
+const passwords = [{
+        level: 1,
+        password: ""
+    },
+    {
+        level: 2,
+        password: "CTF{CapTA1n-cRUCh}"
+    },
+    {
+        level: 3,
+        password: "CTF{capt41n-h00k!}"
+    },
+    {
+        level: 4,
+        password: "CTF{c4pt41N-m0rG4N}"
+    },
+    {
+        level: 5,
+        password: "CTF{C4pt41N-4MErIc4}"
+    }
+];
+const text = document.getElementById("textarea");
+
+// Runs on socket open, equivalent to .addEventListener()
+socket.onopen = function() {
+    log("[+] Connected!");
+};
+
+class Ship {
+    // Initializes class object instance
+    constructor(id, topLeft, bottomRight, direction) {
+        this.id = id;
+        this.topLeft = topLeft;
+        this.bottomRight = bottomRight;
+        this.direction = direction;
+    }
+    // Getter + abusing template literals
+    get printState() {
+        return `ID: ${this.id} | (${Math.floor(this.topLeft.x)}, ${Math.floor(this.topLeft.y)}) (${Math.floor(this.bottomRight.x)}, ${Math.floor(this.bottomRight.y)}) | DIR: ${this.direction}`;
+    }
+}
+
+class Obstacle {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+    }
+}
+
+let obstacles = [
+    new Obstacle(450, 1060), //1
+    new Obstacle(750, 1060), //2
+    new Obstacle(1200, 1060), //3
+    new Obstacle(1600, 1060), //4
+    new Obstacle(604, 700), //5
+    new Obstacle(1070, 600), //6
+    new Obstacle(1730, 650), //7
+    new Obstacle(604, 70), //8
+    new Obstacle(674, 200), //9
+    new Obstacle(1070, 350), //10
+    new Obstacle(1530, 200), //11
+    new Obstacle(1730, 300), //12
+    new Obstacle(232, 575) //13
+]
+
+let hasRotated = {
+    0: false,
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false
+}
+
+window.lastRot = 0;
+let checkList = findAll("toggle");
+
+// Runs when output from server is received
+socket.onmessage = function (event) {
+    // Converts server output into object
+    let obj = JSON.parse(event.data);
+    if (obj.type == "TICK") {
+        let ships = [];
+        // For each ship in obj.ships, push class object into ships array
+        for (const i of obj.ships) {
+            ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
+        }
+        // Call the string literal getter
+        for (const i of ships) {
+            log(i.printState);
+            // Infinite checks!
+            if (!checkList[0].checked) {
+                check(i, obstacles[0], "LEFT");
+                check(i, obstacles[1], "RIGHT");
+            }
+            if (!checkList[1].checked) {
+                check(i, obstacles[2], "LEFT");
+                check(i, obstacles[3], "RIGHT");
+            }
+            if (!checkList[2].checked) {
+                check(i, obstacles[4], "DOWN");
+                check(i, obstacles[7], "UP");
+            }
+            if (!checkList[3].checked) {
+                check(i, obstacles[5], "DOWN");
+                check(i, obstacles[9], "UP");
+            }
+            if (!checkList[4].checked) {
+                check(i, obstacles[6], "DOWN");
+                check(i, obstacles[11], "UP");
+            }
+            if (!checkList[5].checked) {
+                check(i, obstacles[8], "LEFT");
+                check(i, obstacles[10], "RIGHT");
+            }
+            // Auto-docking obstacle
+            check90(i, obstacles[12], "LEFT");
+        }
+    } else {
+        log(JSON.stringify(JSON.parse(event.data)));
+    }
+    // Guard clause for looping ships!
+    if (performance.now() - window.lastRot < 500) return;
+    window.lastRot = performance.now();
+    // If statement for each element that begins with "loop"
+    findAll("loop").forEach(function (element, index) {
+        if (element.checked) {
+            socket.send(JSON.stringify({
+                type: "SHIP_STEER",
+                shipId: `${index}`
+            }));
+        }
+    });
+};
+
+// Assigns onclick listeners for each level button
+findAll("lvl").forEach(function(element, index) {
+    element.onclick = function() {
+        socket.send(JSON.stringify({
+            type: "START_GAME",
+            level: passwords[index].level,
+            password: passwords[index].password
+        }));
+    };
+});
+
+// Assigns onclick listeners for each steer button
+findAll("steer").forEach(function(element, index) {
+    element.onclick = function() {
+        socket.send(JSON.stringify({
+            type: "SHIP_STEER",
+            shipId: `${index}`
+        }));
+    };
+});
+
+// Creates DOM array for each element with name id + int
+function findAll(id) {
+    let i = 0;
+    let list = [];
+    while (document.getElementById(id + i)) {
+        list[i] = document.getElementById(id + i);
+        i++;
+    }
+    return list;
+}
+
+function log(str) {
+    text.value += "\n" + str;
+    text.value = text.value.substring(text.value.length - 10000);
+    text.scrollTop = text.scrollHeight;
+}
+
+function turn180(id) {
+    socket.send(JSON.stringify({
+        type: "SHIP_STEER",
+        shipId: id
+    }));
+    socket.send(JSON.stringify({
+        type: "SHIP_STEER",
+        shipId: id
+    }));
+}
+
+function check(s, o, d) {
+    if (!hasRotated[s.id] &&
+        Math.abs(s.topLeft.y - o.y) < 75 &&
+        Math.abs(s.topLeft.x - o.x) < 75 &&
+        s.direction == d) {
+        hasRotated[s.id] = true;
+        turn180(s.id);
+        setTimeout(() => {
+            hasRotated[s.id] = false
+        }, "1000");
+    }
+}
+
+function check90(s, o, d) {
+    // Calculates middle of ship in coordinates
+    let mid = Math.abs(Math.floor(s.topLeft.x + s.bottomRight.x) / 2);
+    if (!hasRotated[s.id] &&
+        Math.abs(s.topLeft.y - o.y) < 400 && // Large y for legroom
+        Math.abs(mid - o.x) < 20 && // Small x for accuracy
+        s.direction == d) {
+        hasRotated[s.id] = true;
+        socket.send(JSON.stringify({
+            type: "SHIP_STEER",
+            shipId: s.id
+        }));
+        setTimeout(() => {
+            hasRotated[s.id] = false
+        }, "1000");
+    }
+}
+```
 
 ---
 
