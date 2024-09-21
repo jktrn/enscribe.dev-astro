@@ -79,16 +79,15 @@ Paying close attention to the right side of this graphic, we can see that there'
 ### The Chinese Remainder Theorem
 
 <InfoBox type="info">
-**Recall**: The *modulus* is the remainder of [Euclidian division](https://en.wikipedia.org/wiki/Euclidean_division) (division with remainder) of one number by another. For example, $$2 = 12 \pmod{5}$$.
+  **Recall**: The *modulus* is the remainder of [Euclidian division](https://en.wikipedia.org/wiki/Euclidean_division) (division with remainder) of one number by another. For example, $$2 = 12 \pmod{5}$$.
 
-However, this is different from the **congruence modulo** relation, represented by the congruence symbol $$\equiv$$ and often expressed as $$a \equiv b \pmod{m}$$. When two numbers $$a$$ and $$b$$ are congruent modulo $$m$$, it means that:
-
-1. $$a$$ and $$b$$ have the same remainder when divided by $$m$$
-2. $$a - b$$ is divisible by $$m$$ (i.e. $$m \mid (a - b)$$)
-3. There is an integer $$k$$ such that $$a = km + b$$
-
-As such, $$12 \equiv 2 \pmod{5}$$ is true, but $$12 = 2 \pmod{5}$$ is obviously false.
-
+  However, this is different from the **congruence modulo** relation, represented by the congruence symbol $$\equiv$$ and often expressed as $$a \equiv b \pmod{m}$$. When two numbers $$a$$ and $$b$$ are congruent modulo $$m$$, it means that:
+  
+  1. $$a$$ and $$b$$ have the same remainder when divided by $$m$$
+  2. $$a - b$$ is divisible by $$m$$ (i.e. $$m \mid (a - b)$$)
+  3. There is an integer $$k$$ such that $$a = km + b$$
+  
+  As such, $$12 \equiv 2 \pmod{5}$$ is true, but $$12 = 2 \pmod{5}$$ is obviously false.
 </InfoBox>
 
 We start with a concept called a "system of congruences." A system of congruences is a set of equations of the form $$x \equiv a_i \pmod{m_i}$$, where $$a_i$$, $$b_i$$, and $$m_i$$ are integers. The $$m_i$$ values are called the **moduli** of the system. Here's a quick example of this:
@@ -106,23 +105,20 @@ In this system, we have three congruences with moduli $$2$$, $$3$$, and $$5$$. T
 Thus, we can apply the Chinese Remainder Theorem:
 
 <InfoBox>
-**Chinese Remainder Theorem**: Given pairwise coprime integers $$n_1, n_2, \ldots, n_k$$ and arbitrary integers $$a_1, a_2, \ldots, a_k$$, the system of simultaneous congruences
-    
-$$
-\begin{cases}
-x &\equiv a_1 \pmod{n_1} \\
-x &\equiv a_2 \pmod{n_2} \\
-\vdots \\
-x &\equiv a_k \pmod{n_k}
-\end{cases}
-$$
-
-has a solution, and the solution is unique modulo $$N = n_1 n_2 \cdots n_k$$.
-
+  **Chinese Remainder Theorem**: Given pairwise coprime integers $$n_1, n_2, \ldots, n_k$$ and arbitrary integers $$a_1, a_2, \ldots, a_k$$, the system of simultaneous congruences
+  $$
+  \begin{cases}
+  x &\equiv a_1 \pmod{n_1} \\
+  x &\equiv a_2 \pmod{n_2} \\
+  \vdots \\
+  x &\equiv a_k \pmod{n_k}
+  \end{cases}
+  $$
+  has a solution, and the solution is unique modulo $$N = n_1 n_2 \cdots n_k$$.
 </InfoBox>
 
 <InfoBox type="info">
-**Note**: Although the Chinese Remainder Theorem is often stated with pairwise coprime moduli (meaning that for a set of moduli $$M = \{n_1, n_2, \ldots, n_k\}$$, $$\gcd(n_i, n_j) = 1$$ for all $$i \neq j$$), it can be extended to non-coprime moduli. However, doing so does not guarantee a solution — this will become increasingly relevant as we get towards our implementation process.
+  **Note**: Although the Chinese Remainder Theorem is often stated with pairwise coprime moduli (meaning that for a set of moduli $$M = \{n_1, n_2, \ldots, n_k\}$$, $$\gcd(n_i, n_j) = 1$$ for all $$i \neq j$$), it can be extended to non-coprime moduli. However, doing so does not guarantee a solution — this will become increasingly relevant as we get towards our implementation process.
 </InfoBox>
 
 You may be asking: what the hell does this have to do with guessing the giant integer that we've been given? Well, I've concocted a little example here to demonstrate how we can use this theorem to our advantage.
@@ -173,20 +169,19 @@ n_3 &= -2
 $$
 
 <InfoBox type="info">
-**Note**: Bob's chosen negative values for $$n_2$$ and $$n_3$$ because of the earlier relation established, $$x \equiv -n \pmod{\gcd(x + n, m)}$$. Making $$n$$ negative creates positive remainders.
+  **Note**: Bob's chosen negative values for $$n_2$$ and $$n_3$$ because of the earlier relation established, $$x \equiv -n \pmod{\gcd(x + n, m)}$$. Making $$n$$ negative creates positive remainders.
 </InfoBox>
 
 For $$m$$, Bob chooses a very large **primorial**:
 
 <InfoBox>
-**Primorial**: For the $$n$$th prime number $$p_n$$, the primorial $$p_n\#$$ is defined as the product of the first $$n$$ primes:
+  For the $$n$$th prime number $$p_n$$, the primorial $$p_n\#$$ is defined as the product of the first $$n$$ primes:
     
-$$
-p_n\# = \prod_{k=1}^n p_k
-$$
+  $$
+  p_n\# = \prod_{k=1}^n p_k
+  $$
 
-where $$p_k$$ is the prime number.
-
+  where $$p_k$$ is the prime number.
 </InfoBox>
 
 Primorials have the special property in that since they're the product of the first $$n$$ primes, they're guaranteed to have a lot of prime factors. When thrown into the `gcd()` function, this will give us tons of information about the prime factors of $$x$$ since we're a lot more likely to get a hit (a miss would be if $$\gcd(x + n, m) = 1$$).
@@ -462,7 +457,7 @@ Let's try running the script again:
 We've managed to solve the entire challenge with only 16 queries!
 
 <InfoBox type="flag">
-**gcd-query-v2**: `amateursCTF{crt_really_is_too_op...wtf??!??!?!?must_be_cheating!!...i_shouldn't've_removed_query_number_cap.}`
+  **gcd-query-v2**: `amateursCTF{crt_really_is_too_op...wtf??!??!?!?must_be_cheating!!...i_shouldn't've_removed_query_number_cap.}`
 </InfoBox>
 
 ---

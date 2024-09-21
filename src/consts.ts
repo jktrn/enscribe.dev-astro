@@ -18,7 +18,7 @@ export const SITE: Site = {
     'Freelance frontend web development and cybersecurity shenanigans.',
   EMAIL: 'jason@enscribe.dev',
   NUM_POSTS_ON_HOMEPAGE: 2,
-  POSTS_PER_PAGE: 3,
+  POSTS_PER_PAGE: 4,
   SITEURL: 'https://enscribe-dev-astro.vercel.app',
 }
 
