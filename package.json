@@ -9,7 +9,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "prettier": "prettier --write ./src/**/*.{astro,ts,tsx}"
+    "prettier": "prettier --write ./src/**/*.{astro,ts,tsx,css}"
   },
   "dependencies": {
     "@astrojs/check": "^0.7.0",

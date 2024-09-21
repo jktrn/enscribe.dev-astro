@@ -18,8 +18,8 @@ const { avatar, username, handle, date, src, media, video } = Astro.props
 ---
 
 <div class="mx-auto my-6 flex flex-col gap-y-4 rounded-xl border p-4">
-  <div class="not-prose flex justify-between gap-4">
-    <span class="flex items-center gap-3">
+  <div class="not-prose flex flex-wrap justify-between gap-4">
+    <span class="flex flex-wrap items-center gap-3">
       <Avatar
         client:load
         src={avatar}

@@ -90,6 +90,8 @@
     @apply prose-blockquote:!not-italic prose-blockquote:!text-muted-foreground;
     @apply prose-pre:!px-0;
     @apply prose-img:mx-auto prose-img:rounded-xl prose-img:border;
+    @apply prose-table:mx-auto prose-table:block prose-table:max-w-fit prose-table:overflow-x-auto prose-td:break-words;
+    @apply sm:prose-table:mx-0 sm:prose-table:table sm:prose-table:max-w-none;
 
     /* Fixing Katex display */
     .katex-display {

@@ -45,37 +45,43 @@ const {
             <Users className="size-4" />
             {solvers.length > 1 ? 'Solvers' : 'Solver'}
           </div>
-          <div class="flex flex-1 flex-wrap gap-2">
-            {solvers.map((solver) =>
-              solver.href ? (
-                <Link
-                  href={solver.href}
-                  class="flex items-center gap-x-1"
-                  underline
-                  external
-                >
-                  <AvatarComponent
-                    client:load
-                    src={solver.avatar || '/static/logo.webp'}
-                    alt={`${solver.name}'s avatar`}
-                    fallback={solver.name[0]}
-                    className="size-4 rounded-full"
-                  />
-                  <span class="text-xs text-foreground">{solver.name}</span>
-                </Link>
-              ) : (
-                <div class="flex items-center gap-x-1">
-                  <AvatarComponent
-                    client:load
-                    src={solver.avatar || '/static/logo.webp'}
-                    alt={`${solver.name}'s avatar`}
-                    fallback={solver.name[0]}
-                    className="size-4 rounded-full"
-                  />
-                  <span class="text-xs text-foreground">{solver.name}</span>
-                </div>
-              ),
-            )}
+          <div class="flex flex-1 flex-wrap gap-y-2">
+            {solvers
+              .map((solver, index) =>
+                solver.href ? (
+                  <Link
+                    href={solver.href}
+                    class="flex items-center gap-x-1"
+                    underline
+                    external
+                  >
+                    <AvatarComponent
+                      client:load
+                      src={solver.avatar || '/static/logo.webp'}
+                      alt={`${solver.name}'s avatar`}
+                      fallback={solver.name[0]}
+                      className="size-4 rounded-full"
+                    />
+                    <span class="text-xs text-foreground">{solver.name}</span>
+                  </Link>
+                ) : (
+                  <div class="flex items-center gap-x-1">
+                    <AvatarComponent
+                      client:load
+                      src={solver.avatar || '/static/logo.webp'}
+                      alt={`${solver.name}'s avatar`}
+                      fallback={solver.name[0]}
+                      className="size-4 rounded-full"
+                    />
+                    <span class="text-xs text-foreground">{solver.name}</span>
+                  </div>
+                ),
+              )
+              .reduce((prev, curr, i) => [
+                prev,
+                <span class="mr-1">,</span>,
+                curr,
+              ])}
           </div>
         </div>
       )
