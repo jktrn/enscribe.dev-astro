@@ -156,7 +156,7 @@ I created a `gacha.json`, which contains the entire pool of characters that we u
 
 Manually going through every entry listed in the database, I created the following JSON file:
 
-```json title="gacha.json" showLineNumbers
+```json title="gacha.json" caption="Gacha pool structure" showLineNumbers
 {
   "characters": [
     {
@@ -256,7 +256,7 @@ The new TypeScript project I made utilized the [`jsynowiec/node-typescript-boile
 
 Here is `src/main.ts`, the main entrypoint of the server and the place where the pity system, gacha pool, and endpoint are implemented:
 
-```ts title="src/main.ts" showLineNumbers
+```ts title="src/main.ts" caption="Main backend script" showLineNumbers
 import * as http from 'http'
 import * as url from 'url'
 import * as fs from 'fs'
@@ -394,7 +394,7 @@ We can see that at exactly the one millionth pull sent to the server, the flag i
 
 Testing this endpoint was made buttery smooth with the help of [Jest](https://jestjs.io/); I made a test suite in `__tests__/main.test.ts` which sent a variety of different inputs, and made sure that a correct response was being outputted:
 
-```ts title="__tests__/main.test.ts" showLineNumbers
+```ts title="__tests__/main.test.ts" caption="Backend test suite" showLineNumbers
 import server from '../src/main.js'
 import * as http from 'http'
 import { GachaResponse } from '../src/interfaces.js'
@@ -559,13 +559,12 @@ Luckily, [@blueset](https://github.com/blueset), my team's co-founder, happens t
   [#プロセカ](https://twitter.com/hashtag/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB)
   の 1.9.0
   アップデートで追加された新機能カスタムプロフィールで使用可能なフォントを調べてみました。全
-  10 種類、どれも Fontworks の書体です。
-  [fontworks.co.jp](https://fontworks.co.jp) > **Translation**: I checked out
-  the fonts available for the new Custom Profile feature added in the 1.9.0
-  update of
-  [#Proseka](https://twitter.com/hashtag/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB).
-  There are 10 typefaces in total, all from Fontworks. >
+  10 種類、どれも Fontworks の書体です。  
   [fontworks.co.jp](https://fontworks.co.jp)
+  
+  > **Translation**: I checked out the fonts available for the new Custom Profile feature added in the 1.9.0 update of [#Proseka](https://twitter.com/hashtag/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB). There are 10 typefaces in total, all from Fontworks.  
+  > [fontworks.co.jp](https://fontworks.co.jp)
+
 </StaticTweet>
 
 The first font on this list, ロダン NTLG DB (Rodin New Type Labo Gothic), was the font used for nearly all UI-based text elements in-game:
@@ -729,7 +728,7 @@ public class GachaManager : MonoBehaviour
 
 Notice this extremely suspicious string near the bottom of the script:
 
-```cs title="Assets/Scripts/GachaManager.cs" caption="Suspicious base64 string in CreateGachaWebRequest" showLineNumbers{57} {4}
+```cs title="Assets/Scripts/GachaManager.cs" caption="Suspicious base64 string in CreateGachaWebRequest" highlight{60} showLineNumbers{57}
     UnityWebRequest CreateGachaWebRequest(string json)
     {
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -770,7 +769,7 @@ Other than this, the script is pretty straightforward——if the request fails 
 
 Otherwise, if the request succeeds, responsibility for the data is delegated to the `uiManager.DisplaySplashArt(){:cs}` coroutine:
 
-```cs title="Assets/Scripts/GachaManager.cs" caption="Splash art display in DisplaySplashArt" showLineNumbers{38} skip{46-73} {7}
+```cs title="Assets/Scripts/GachaManager.cs" caption="Splash art display in DisplaySplashArt" showLineNumbers{38} highlight{44}
             if (request.result == UnityWebRequest.Result.Success)
             {
                 HandleGachaResponse(request.downloadHandler.text, numPulls);
@@ -779,34 +778,7 @@ Otherwise, if the request succeeds, responsibility for the data is delegated to 
                 );
                 StartCoroutine(uiManager.DisplaySplashArt(response.characters));
             }
-            else
-            {
-                uiManager.GenericModalHandler(
-                    uiManager.failedConnectionModal,
-                    uiManager.failedConnectionModalCloseButton
-                );
-                AudioController.Instance.PlaySFX("Open");
-            }
-        }
-    }
-
-    UnityWebRequest CreateGachaWebRequest(string json)
-    {
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        string requestUrl = "aHR0cDovLzE3Mi44Ni42NC44OTozMDAwL2dhY2hh";
-
-        UnityWebRequest request = new UnityWebRequest(
-            System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(requestUrl)),
-            "POST"
-        );
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("User-Agent", "SekaiCTF");
-
-        return request;
-    }
-
+// [!code skip:46:73]
     void HandleGachaResponse(string responseText, int numPulls)
     {
         GachaResponse response = JsonUtility.FromJson<GachaResponse>(responseText);
@@ -1413,24 +1385,24 @@ I know this looks intensely overwhelming, but it's just because all of these dif
 | `public void MusicVolume(){:cs}`                       | Used in the volume sliders in `menuModal{:cs}`. Utilizes the `AudioController{:cs}` (which we'll go over later) to adjust sounds: ![Volume Sliders](assets/volume-sliders.png) Also plays a little sound effect which changes pitch depending on the direction the slider is moving. Of course, since we don't want the sound effect to be spammed per tick of the slider, I added a cooldown.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `public void SFXVolume(){:cs}`                         | Same thing as `MusicVolume(){:cs}` except for SFX.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `public void ExitGame(){:cs}`                          | Also a one-liner: `Application.Quit(){:cs}`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `public void OnPullButtonClick(){:cs}`                 | **Parameters**: `int cost, int numPulls{:cs}`<br />Opens the `pullConfirmationModal{:cs}` and changes the various TextMeshPro objects inside to be accurate (changes the color of `currentCrystalsText{:cs}` to red and disables `pullConfirmationContinueButton{:cs}` if the user doesn't have enough crystals): ![Confirmation Modal](assets/confirmation-modal.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `public void GenericModalHandler(){:cs}`               | **Parameters**: `GameObject modal, Button closeButton{:cs}`<br />Plays the default zoom-in/zoom-out animations, sound effects, and enables darkened background whenever a modal is opened via button: ![Modal Handler](assets/modal-handler.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `public void OnPullButtonClick(){:cs}`                 | **Parameters**: `int cost{:cs}`, `int numPulls{:cs}`<br />Opens the `pullConfirmationModal{:cs}` and changes the various TextMeshPro objects inside to be accurate (changes the color of `currentCrystalsText{:cs}` to red and disables `pullConfirmationContinueButton{:cs}` if the user doesn't have enough crystals): ![Confirmation Modal](assets/confirmation-modal.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `public void GenericModalHandler(){:cs}`               | **Parameters**: `GameObject modal{:cs}`, `Button closeButton{:cs}`<br />Plays the default zoom-in/zoom-out animations, sound effects, and enables darkened background whenever a modal is opened via button: ![Modal Handler](assets/modal-handler.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `public IEnumerator DisplaySplashArt(){:cs}`           | **Parameters**: `Character[] characters{:cs}`<br />Whenever you pull for characters in Project Sekai, a "carousel" of "splash art" representing each character appears one-by-one on your screen until you've cycled through everything you've pulled. This method handles the entire process by cycling through the `Character[]{:cs}` array and calling the following `Display____StarCharacter(){:cs}` coroutines (will be referred to as "splash art coroutines" from here for brevity). It pauses the iteration through the loop (via `WaitUntil(() => CheckForSkipOrClick(characters, i)){:cs}`) until the user clicks after the aforementioned coroutine is completed.                                                                                                                                                                                            |
 | `private IEnumerator DisplayTwoStarCharacter(){:cs}`   | **Parameters**: `Character character{:cs}`<br />Handles the animations and sound effects for a two-star splash art. Since I chose to animate using the seriously outdated legacy Animation component (I was too lazy to learn the new Animator), I had to trigger the animations through code. It's seriously ugly, but for such a small use case like this I didn't find it necessary: ![Two Star Animation](assets/two-star-animation.gif) The script replaces every pixel in the initial splash art with a static color representing the character (Kohane's is `#FF679A{:cs}`) to create a silhouette, and uses a moving mask to achieve a "wiping" animation on top of the silhouette. The silhouette then moves diagonally to create a shadow. The background triangle movement was achieved using the `BackgroundScroller.cs{:cs}` file, which will be overviewed later. |
 | `private IEnumerator DisplayThreeStarCharacter(){:cs}` | **Parameters**: `Character character{:cs}`<br />Handles three-star splash art. Since splash art for this rarity takes up the entire screen instead of using a small silhouette, I had to give it different treatment (and therefore different animations): ![Three Star Animation](assets/three-star-animation.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `private IEnumerator DisplayFourStarCharacter(){:cs}`  | **Parameters**: `Character character{:cs}`<br />Will be revealed when solving the challenge!                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `private IEnumerator SetInactiveAfterDelay(){:cs}`     | **Parameters**: `GameObject gameObject, float delay{:cs}`<br />Just a simple utility method which is typically called when closing a modal. Since we want the closing animation to play (rather than disabling the modal immediately), we wait a little bit before setting it to inactive.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `private void UpdateSplashArtImage(){:cs}`             | **Parameters**: `string splashArt, Image image{:cs}`<br />Changes the image after each iteration through the splash art carousel, called at the beginning of every splash art coroutine.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `private IEnumerator SetInactiveAfterDelay(){:cs}`     | **Parameters**: `GameObject gameObject{:cs}`, `float delay{:cs}`<br />Just a simple utility method which is typically called when closing a modal. Since we want the closing animation to play (rather than disabling the modal immediately), we wait a little bit before setting it to inactive.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `private void UpdateSplashArtImage(){:cs}`             | **Parameters**: `string splashArt{:cs}`, `Image image{:cs}`<br />Changes the image after each iteration through the splash art carousel, called at the beginning of every splash art coroutine.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `private void UpdateSilhouetteImage(){:cs}`            | **Parameters**: `string splashArt{:cs}`<br />Replaces each pixel within a splash art to create a silhouette of solid color. Called in `DisplayTwoStarCharacter(){:cs}`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `private void DisplayAvatars(){:cs}`                   | **Parameters**: `Character[] characters{:cs}`<br />Handles the instantiation/destruction of `avatarImages{:cs}` within the Grid Layout Group component of `gachaOverviewCanvas{:cs}`: ![Gacha Overview](assets/gacha-overview.gif)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `private void SetImageOpacity(){:cs}`                  | **Parameters**: `MaskableGraphic image, float targetOpacity{:cs}`<br />Utility method exclusively for `ResetAnimations(){:cs}`. Used to set transparency to 0 when resetting animations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `private void SetImageOpacity(){:cs}`                  | **Parameters**: `MaskableGraphic image{:cs}`, `float targetOpacity{:cs}`<br />Utility method exclusively for `ResetAnimations(){:cs}`. Used to set transparency to 0 when resetting animations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `private void DisplayGachaOverview(){:cs}`             | Disables and enables all the appropriate layers and plays the correct sound effects during the transition to the gacha overview page (the grid layout screen with avatars of all the characters you've pulled). Fades the looping music in the background into a different song.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `private void OnSkipButtonClick(){:cs}`                | Skips the splash art carousel (via `StopAllCoroutines(){:cs}`) and goes straight to the gacha overview screen.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `private void OnNextButtonClick(){:cs}`                | A one-liner which disables the gacha overview once the user is finished observing it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `private void OnPullAgainButtonClick(){:cs}`           | Starts the entire backend request -> splash art carousel event chain once again, as long as the user has enough crystals. Is disabled/greyed out if otherwise.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `private void OnGachaDetailsButtonClick(){:cs}`        | Dedicated listener for the `gachaDetailsModal{:cs}` instead of using `GenericModalHandler(){:cs}`. For some reason, the Scroll Rect component's area was bugging out whenever it interacted with my zoom-in/zoom-out animations, with the scrollable area seemingly moving on its own whenever the modal is opened/closed. This method resets the `verticalNormalizedPosition{:cs}` of the Scroll Rect each time to prevent this.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `private void ResetAnimations(){:cs}`                  | Resets every animation at the start of each iteration (e.g. moving the mask back to its place, changing opacities/colors back to normal).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `private bool CheckForSkipOrClick(){:cs}`              | **Parameters**: `Character[] characters, int index{:cs}`<br />An isolated part of the `DisplaySplashArt(){:cs}` coroutine, which checks to see if the user has clicked on the screen to iterate through the carousel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `private bool CheckForSkipOrClick(){:cs}`              | **Parameters**: `Character[] characters{:cs}`, `int index{:cs}`<br />An isolated part of the `DisplaySplashArt(){:cs}` coroutine, which checks to see if the user has clicked on the screen to iterate through the carousel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 And we're done! See, it wasn't _too_ bad, right?
 
@@ -1603,19 +1575,10 @@ With this, we can now freely drag audio clips into the audio controller, rename 
 
 ![Audio Inspector](assets/audio-inspector.png)
 
-```cs title="Assets/Scripts/UIManager.cs" caption="Audio Controller Usage" showLineNumbers{433} skip{435-444} {14,16}
+```cs title="Assets/Scripts/UIManager.cs" caption="Audio Controller Usage" showLineNumbers{433} highlight{437,439}
     private void DisplayGachaOverview()
     {
-        if (gameState.crystals < 1000)
-        {
-            pullAgainButton.GetComponent<ShrinkButton>().enabled = false;
-            pullAgainButton.interactable = false;
-        }
-        else
-        {
-            pullAgainButton.GetComponent<ShrinkButton>().enabled = true;
-            pullAgainButton.interactable = true;
-        }
+// [!code skip:435:444]
         splashArtCanvas.gameObject.SetActive(false);
         AudioController.Instance.FadeMusic("Gacha");
         DisplayAvatars(gachaManager.lastGachaResponse.characters);
@@ -1889,7 +1852,7 @@ Since we have a lot of context now on how the game is made and the various scrip
   title="Azusawa's Gacha World"
   authors={["enscribe"]}
   points={100}
-  category="Web"
+  category="Reverse"
   solves={250}
   files={["dist.zip"]}
 >
@@ -1952,7 +1915,7 @@ Deobfuscating this string with a simple base64 decoder reveals the following IP 
 
 Let's figure out the structure that the game is sending to the server. Let's take a closer look at the `CreateGachaWebRequest(){:cs}` method:
 
-```cs title="Assembly-CSharp.dll" caption="CreateGachaWebRequest Method" showLineNumbers{51} {9-10}
+```cs title="Assembly-CSharp.dll" caption="CreateGachaWebRequest Method" showLineNumbers{51} highlight{59-60}
 	// Token: 0x06000016 RID: 22 RVA: 0x0000259C File Offset: 0x0000079C
 	private UnityWebRequest CreateGachaWebRequest(string json)
 	{
@@ -1969,7 +1932,7 @@ Let's figure out the structure that the game is sending to the server. Let's tak
 
 We can see that `SetRequestHeader(){:cs}` is being called to add some custom headers to the web request: `User-Agent: SekaiCTF{:yml}` and `Content-Type: application/json{:yml}`. The contents of the JSON payload itself can be reversed from the `SendGachaRequest(){:cs}` class:
 
-```cs title="Assembly-CSharp.dll" caption="SendGachaRequest Method" showLineNumbers{27} {4}
+```cs title="Assembly-CSharp.dll" caption="SendGachaRequest Method" showLineNumbers{27} highlight{30}
 	// Token: 0x06000015 RID: 21 RVA: 0x00002585 File Offset: 0x00000785
 	public IEnumerator SendGachaRequest(int numPulls)
 	{
@@ -1999,7 +1962,7 @@ We can see that a new `GachaRequest{:cs}` is being created with the parameters `
 
 ![Recompiling DLL](assets/recompiling-dll.png)
 
-```cs title="Assembly-CSharp.dll" caption="Modifying GachaRequest Parameters" showLineNumbers
+```cs title="Assembly-CSharp.dll" caption="Modifying GachaRequest Parameters" showLineNumbers add{14} remove{13,30-32}
 using System;
 using System.Collections;
 using RequestClasses;
@@ -2012,8 +1975,8 @@ public partial class GachaManager : MonoBehaviour
 	// Token: 0x06000021 RID: 33
 	public IEnumerator SendGachaRequest(int numPulls)
 	{
-        string json = JsonUtility.ToJson(new GachaRequest(this.gameState.crystals, this.gameState.pulls, numPulls)); // [!code --]
-		string json = JsonUtility.ToJson(new GachaRequest(10000000, 999999, numPulls)); // [!code ++]
+        string json = JsonUtility.ToJson(new GachaRequest(this.gameState.crystals, this.gameState.pulls, numPulls));
+		string json = JsonUtility.ToJson(new GachaRequest(10000000, 999999, numPulls));
 		using (UnityWebRequest request = this.CreateGachaWebRequest(json))
 		{
 			yield return request.SendWebRequest();
@@ -2029,9 +1992,9 @@ public partial class GachaManager : MonoBehaviour
 				AudioController.Instance.PlaySFX("Open");
 			}
 		}
-		UnityWebRequest request = null; // [!code --]
-		yield break; // [!code --]
-		yield break; // [!code --]
+		UnityWebRequest request = null;
+		yield break;
+		yield break;
 	}
 }
 ```

@@ -46,9 +46,9 @@ const {
             {solvers.length > 1 ? 'Solvers' : 'Solver'}
           </div>
           <div class="flex flex-1 flex-wrap gap-y-2">
-            {solvers
-              .map((solver, index) =>
-                solver.href ? (
+            {solvers.map((solver, index) => (
+              <div class="flex items-center">
+                {solver.href ? (
                   <Link
                     href={solver.href}
                     class="flex items-center gap-x-1"
@@ -75,13 +75,10 @@ const {
                     />
                     <span class="text-xs text-foreground">{solver.name}</span>
                   </div>
-                ),
-              )
-              .reduce((prev, curr, i) => [
-                prev,
-                <span class="mr-1">,</span>,
-                curr,
-              ])}
+                )}
+                {index < solvers.length - 1 && <span class="mr-1">,</span>}
+              </div>
+            ))}
           </div>
         </div>
       )

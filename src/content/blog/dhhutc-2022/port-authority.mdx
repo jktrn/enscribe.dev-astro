@@ -42,7 +42,7 @@ This was the first CTF problem which didn't just challenge my ability to critica
       avatar: 'https://github.com/sahuang.png',
     },
   ]}
-  category="ppc"
+  category="PPC"
   points="5/5 = 350"
 >
   The harbour is in total chaos, the ships are no longer on course. The AI has
@@ -112,28 +112,22 @@ Look what happens when we establish a connection - the game starts running, and 
 
 Let's see what happens when we send the `SHIP_STEER` command to the server after five seconds. We can do that with the [`setTimeout()`](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout) method in our `socket.onopen` listener:
 
-```js title="solve.js" caption="Testing steering mechanic" showLineNumbers{9}
-socket.onopen = function () {
-  console.log('[+] Connected!')
-  // Converts object to string
-  socket.send(
-    JSON.stringify({
-      type: 'START_GAME',
-      level: 1,
-    }),
-  )
-  // Sends steer command after one second // [!code ++]
-  setTimeout(() => {
-    // [!code ++]
-    socket.send(
-      JSON.stringify({
-        // [!code ++]
-        type: 'SHIP_STEER', // [!code ++]
-        shipId: 0, // [!code ++]
-      }),
-    ) // [!code ++]
-  }, 5000)
-}
+```js title="solve.js" caption="Testing steering mechanic" showLineNumbers{9} add{16-22}
+socket.onopen = function() {
+    console.log("[+] Connected!");
+    // Converts object to string
+    socket.send(JSON.stringify({
+        "type": "START_GAME",
+        "level": 1
+    }));
+    // Sends steer command after one second
+    setTimeout(() => {
+        socket.send(JSON.stringify({
+            "type": "SHIP_STEER",
+            "shipId": 0
+        }));
+    }, 5000);
+};
 ```
 
 ![First Turn](assets/first-turn.gif)
@@ -148,22 +142,22 @@ With this, we have a goal: **get the ship into the port by sending JSON instruct
 
 Firstly, cleaning up the output involves parsing what we receive from the server, which we can do with the `JSON.parse()` method. We'll assign it into a variable named `obj` (and also delete our steer-testing code):
 
-```js title="solve.js" caption="Parsing JSON" showLineNumbers{16}
-// Sends steer command after one second // [!code --]
-    setTimeout(() => { // [!code --]
-        socket.send(JSON.stringify({ // [!code --]
-            "type": "SHIP_STEER", // [!code --]
-            "shipId": 0 // [!code --]
-        })); // [!code --]
-    }, 5000); // [!code --]
+```js title="solve.js" caption="Parsing JSON" showLineNumbers{16} add{29-30} remove{16-23}
+// Sends steer command after one second
+    setTimeout(() => {
+        socket.send(JSON.stringify({
+            "type": "SHIP_STEER",
+            "shipId": 0
+        }));
+    }, 5000);
 };
 
 // Runs when output from server is received
 socket.onmessage = function(event) {
     // Output is received in event
     console.log(`[-] ${event.data}`);
-    // Converts server output into object // [!code ++]
-    let obj = JSON.parse(event.data); // [!code ++]
+    // Converts server output into object
+    let obj = JSON.parse(event.data);
 };
 ```
 
@@ -196,45 +190,39 @@ Each tick, `obj` will change to an object structured this way:
 
 Check out the `obj.type{:js}` key - there'll be multiple types of these (including but not limited to `"LOSS"{:js}`, `"GAME_START"{:js}`). We'll make it so that if `obj.type{:js}` is `"TICK"{:js}`, it will create a new `Class{:js}` instance for each object in the `obj.ships{:js}` array:
 
-```js title="solve.js" caption="Ship class, instance creation, pretty logging" showLineNumbers{18}
+```js title="solve.js" caption="Ship class, instance creation, pretty logging" showLineNumbers{18} add{18-32,38-47}
 class Ship {
-  // [!code ++]
-  // Initializes class object instance // [!code ++]
-  constructor(id, topLeft, bottomRight, direction) {
-    // [!code ++]
-    this.id = id // [!code ++]
-    this.topLeft = topLeft // [!code ++]
-    this.bottomRight = bottomRight // [!code ++]
-    this.direction = direction // [!code ++]
-  } // [!code ++]
-  // Getter + abusing template literals // [!code ++]
-  get printState() {
-    // [!code ++]
-    return `ID: ${this.id} | (${Math.floor(this.topLeft.x)},  // [!code ++]
-${Math.floor(this.topLeft.y)}) (${Math.floor(this.bottomRight.x)},  // [!code ++]
-${Math.floor(this.bottomRight.y)}) | DIR: ${this.direction}` // [!code ++]
-  } // [!code ++]
-} // [!code ++]
+    // Initializes class object instance
+    constructor(id, topLeft, bottomRight, direction) {
+        this.id = id;
+        this.topLeft = topLeft;
+        this.bottomRight = bottomRight;
+        this.direction = direction;
+    }
+    // Getter + abusing template literals
+    get printState() {
+        return `ID: ${this.id} | (${Math.floor(this.topLeft.x)}, 
+${Math.floor(this.topLeft.y)}) (${Math.floor(this.bottomRight.x)}, 
+${Math.floor(this.bottomRight.y)}) | DIR: ${this.direction}`;
+    }
+}
 
 // Runs when output from server is received
-socket.onmessage = function (event) {
-  // Converts server output into object
-  let obj = JSON.parse(event.data)
-  if (obj.type == 'TICK') {
-    // [!code ++]
-    let ships = [] // [!code ++]
-    // For each ship in obj.ships, push class object into ships array // [!code ++]
-    for (const i of obj.ships) {
-      // [!code ++]
-      ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction)) // [!code ++]
-    } // [!code ++]
-    // Call the string literal getter // [!code ++]
-    for (const i of ships) {
-      // [!code ++]
-      console.log(i.printState) // [!code ++]
-    } // [!code ++]
-  }
-}
+socket.onmessage = function(event) {
+    // Converts server output into object
+    let obj = JSON.parse(event.data);
+    if(obj.type == "TICK") {
+        let ships = [];
+        // For each ship in obj.ships, push class object into ships array
+        for(const i of obj.ships) {
+            ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
+        }
+        // Call the string literal getter
+        for(const i of ships) {
+            console.log(i.printState);
+        }
+    }
+};
 ```
 
 With this new Class, we can get both our own `ships` array _and_ really clean logging from the server:
@@ -285,78 +273,61 @@ The last thing I want to add was a web-based "controller", which can steer the s
 
 Here's the JS that adds functionality to these buttons. Note that these are made to be scalable/"future-proof", meaning I can freely add more buttons without needing to copy/paste slight alterations of the same code. I also made some changes upon switching to the CodePen, including deleting the `require()` method and preventing level 1 from automatically starting on-open:
 
-```js title="solve.js" caption="Future-proof DOM listeners & events" showLineNumbers
-// Make sure you install WebSocket with "npm i ws"! // [!code --]
-const WebSocket = require('ws') // [!code --]
+```js title="solve.js" caption="Future-proof DOM listeners & events" showLineNumbers add{7-12,24-54} remove{1-2,17-21}
+// Make sure you install WebSocket with "npm i ws"!
+const WebSocket = require('ws');
 // Regex so that I can freely paste the URL when the instance is changed
-const url = 'https://[REDACTED].challenge.hackazon.org/'
+const url = "https://[REDACTED].challenge.hackazon.org/";
 // Opens WebSocket connection
-const socket = new WebSocket(`wss://${url.replace(/^https?:\/\//, '')}ws`)
-// Object literal for level lookup // [!code ++]
-const passwords = [
-  {
-    // [!code ++]
-    level: 1, // [!code ++]
-    password: '', // [!code ++]
-  }, // [!code ++]
-] // [!code ++]
+const socket = new WebSocket(`wss://${url.replace(/^https?:\/\//, "")}ws`);
+// Object literal for level lookup
+const passwords = [{
+        level: 1,
+        password: ""
+    }
+];
 
 // Runs on socket open, equivalent to .addEventListener()
-socket.onopen = function () {
-  console.log('[+] Connected!')
-  // Converts object to string // [!code --]
-  socket.send(
-    JSON.stringify({
-      // [!code --]
-      type: 'START_GAME', // [!code --]
-      level: 1, // [!code --]
-    }),
-  )
-}
-// [!code skip{23-52}]
-// Assigns onclick listeners for each level button // [!code ++]
-findAll('lvl').forEach(function (element, index) {
-  // [!code ++]
-  element.onclick = function () {
-    // [!code ++]
-    socket.send(
-      JSON.stringify({
-        // [!code ++]
-        type: 'START_GAME', // [!code ++]
-        level: passwords[index].level, // [!code ++]
-        password: passwords[index].password, // [!code ++]
-      }),
-    ) // [!code ++]
-  } // [!code ++]
-}) // [!code ++]
-// [!code ++]
-// Assigns onclick listeners for each steer button // [!code ++]
-findAll('steer').forEach(function (element, index) {
-  // [!code ++]
-  element.onclick = function () {
-    // [!code ++]
-    socket.send(
-      JSON.stringify({
-        // [!code ++]
-        type: 'SHIP_STEER', // [!code ++]
-        shipId: `${index}`, // [!code ++]
-      }),
-    ) // [!code ++]
-  } // [!code ++]
-}) // [!code ++]
-// [!code ++]
-// Creates DOM array for each element with name id + int // [!code ++]
+socket.onopen = function() {
+    console.log("[+] Connected!");
+    // Converts object to string
+    socket.send(JSON.stringify({
+        "type": "START_GAME",
+        "level": 1
+    }));
+};
+// [!code skip:16:45]
+// Assigns onclick listeners for each level button
+findAll("lvl").forEach(function(element, index) {
+    element.onclick = function() {
+        socket.send(JSON.stringify({
+            type: "START_GAME",
+            level: passwords[index].level,
+            password: passwords[index].password
+        }));
+    };
+});
+ 
+// Assigns onclick listeners for each steer button
+findAll("steer").forEach(function(element, index) {
+    element.onclick = function() {
+        socket.send(JSON.stringify({
+            type: "SHIP_STEER",
+            shipId: `${index}`
+        }));
+    };
+});
+ 
+// Creates DOM array for each element with name id + int
 function findAll(id) {
-  // [!code ++]
-  let i = 0 // [!code ++]
-  let list = [] // [!code ++]
-  while (document.getElementById(id + i)) {
-    // [!code ++]
-    list[i] = document.getElementById(id + i) // [!code ++]
-    i++ // [!code ++]
-  } // [!code ++]
-  return list // [!code ++]
-} // [!code ++]
+    let i = 0;
+    let list = [];
+    while (document.getElementById(id + i)) {
+        list[i] = document.getElementById(id + i);
+        i++;
+    }
+    return list;
+}
 ```
 
 The preview on CodePen will look something like this:
@@ -369,122 +340,53 @@ Let's see if it actually works:
 
 We could totally flag the challenge right now, but currently there's no way to see the filtered output we created. I know there's a "Console" button at the bottom-left of CodePen, but I'd like to see the output on the actual webpage, outside of the IDE. To do this, let's create a `log()` function to append strings to a `<textarea>` we'll add in the HTML:
 
-```js title="solve.js" caption="Converting to log() function" showLineNumbers{11} skip{12-36,50-82}
+```js title="solve.js" caption="Converting to log() function" showLineNumbers{11} add{20,22-24,27-31} remove{19}
 const text = document.getElementById("textarea");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// [!code skip:12:36]
         // For each ship in obj.ships, push class object into ships array
         for(const i of obj.ships) {
             ships.push(new Ship(i.id, i.area[0], i.area[1], i.direction));
         }
         // Call the string literal getter
         for(const i of ships) {
-            console.log(i.printState); // [!code --]
-            log(i.printState); // [!code ++]
+            console.log(i.printState);
+            log(i.printState);        
         }
-    } else { // [!code ++]
-      log(JSON.stringify(JSON.parse(event.data))); // [!code ++]
-    } // [!code ++]
+    } else {
+      log(JSON.stringify(JSON.parse(event.data)));
+    }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function log(str) { // [!code ++]
-    text.value += "\n" + str; // [!code ++]
-    text.value = text.value.substring(text.value.length - 10000); // [!code ++]
-    text.scrollTop = text.scrollHeight; // [!code ++]
-} // [!code ++]
+// [!code skip:49:81]
+function log(str) {
+    text.value += "\n" + str;
+    text.value = text.value.substring(text.value.length - 10000);
+    text.scrollTop = text.scrollHeight;
+}
 ```
 
 We'll also spice up the page slightly with flexboxes, a `<fieldset>` and some CSS:
 
-```html title="index.html" caption="Adding flexboxes and fieldsets"
+```html title="index.html" caption="Adding flexboxes and fieldsets" showLineNumbers add{1-3,5,7,9,11-17}
 <div class="flex-container">
-  <!-- [!code ++] -->
-  <div>
-    <!-- [!code ++] -->
-    <fieldset>
-      <!-- [!code ++] -->
-      <p>Start Level:</p>
-      <div>
-        <!-- [!code ++] -->
-        <button id="lvl0">Level 1</button>
-      </div>
-      <!-- [!code ++] -->
-      <p>Steer Ships:</p>
-      <div>
-        <!-- [!code ++] -->
-        <button id="steer0">Steer 0</button>
-      </div>
-      <!-- [!code ++] -->
-    </fieldset>
-    <!-- [!code ++] -->
-  </div>
-  <!-- [!code ++] -->
-  <div>
-    <!-- [!code ++] -->
-    <textarea id="textarea" cols="80" rows="20"></textarea>
-    <!-- [!code ++] -->
-  </div>
-  <!-- [!code ++] -->
+    <div>
+        <fieldset>
+            <p>Start Level:</p>
+            <div>
+                <button id="lvl0">Level 1</button>
+            </div>
+            <p>Steer Ships:</p>
+            <div>
+                <button id="steer0">Steer 0</button>
+            </div>
+        </fieldset>
+    </div>
+    <div>
+        <textarea id="textarea" cols="80" rows="20"></textarea>
+    </div>
 </div>
-<!-- [!code ++] -->
 ```
 
-```css title="style.css" caption="Some beauty treatment"
+```css title="style.css" caption="Some beauty treatment" showLineNumbers
 .flex-container {
   display: flex;
   flex-wrap: nowrap;
@@ -529,7 +431,7 @@ Here's the preview now:
 
 Sorry I was being extra. Let's flag the challenge now (sped up):
 
-```text
+```text /CTF{CapTA1n-cRUCh}/
 ...
 ID: 0 | (688, 115) (748, 383) | DIR: UP
 ID: 0 | (688, 115) (748, 383) | DIR: UP
@@ -563,24 +465,24 @@ We've succesfully completed Level 1!
 
 "Lets script it"? I've already scripted throughout the entirety of Level 1 to accommodate for future levels! Let's add a Level 2 button to our scalable, future-proof code 😉:
 
-```js title="solve.js" caption="Adding Level 2 button" showLineNumbers{6}
+```js title="solve.js" caption="Adding Level 2 button" showLineNumbers{6} add{10-13}
 const passwords = [{
         level: 1,
         password: ""
     },
-    { // [!code ++]
-        level: 2, // [!code ++]
-        password: "CTF{CapTA1n-cRUCh}" // [!code ++]
-    } // [!code ++]
+    {
+        level: 2,
+        password: "CTF{CapTA1n-cRUCh}"
+    }
 ];
 ```
 
-```html title="index.html" caption="Adding Level 2 button" showLineNumbers{3}
+```html title="index.html" caption="Adding Level 2 button" showLineNumbers{3} add{7}
 <fieldset>
     <p>Start Level:</p>
         <div>
             <button id="lvl0">Level 1</button>
-            <button id="lvl1">Level 2</button> <!-- [!code ++]
+            <button id="lvl1">Level 2</button>  
         </div>
 ```
 
@@ -590,12 +492,12 @@ This is what appears when clicking the button:
 
 Looks like we'll have to add two more steer buttons:
 
-```html title="index.html" caption="Adding steer buttons" showLineNumbers{9}
+```html title="index.html" caption="Adding steer buttons" showLineNumbers{9} add{12-13}
 <p>Steer Ships:</p>
         <div>
             <button id="steer0">Steer 0</button>
-            <button id="steer1">Steer 1</button> <!-- [!code ++] -->
-            <button id="steer2">Steer 2</button> <!-- [!code ++] -->
+            <button id="steer1">Steer 1</button>
+            <button id="steer2">Steer 2</button>  
         </div>
 </fieldset>
 ```
@@ -604,7 +506,7 @@ It seems as though that you also need the ships to enter in a specific order. It
 
 ![Flag 2](assets/flag2.gif)
 
-```text
+```text /CTF{capt41n-h00k!}/
 ...
 ID: 0 | (789, 105) (849, 294) | DIR: UP
 ID: 1 | (796, 105) (856, 373) | DIR: UP
@@ -637,26 +539,26 @@ They added some rocks to the board, and the ships are now moving at a faster spe
 
 Here's the plan: let's make it so that these ships will constantly rotate at a certain interval - in doing so, they'll complete a 360° loop within a small area, and we can commandeer them one-at-a-time by disabling the loop for certain ships. Let's start by adding checkboxes to enable the loop:
 
-```html title="index.html" caption="Adding loop checkboxes" showLineNumbers{10}
+```html title="index.html" caption="Adding loop checkboxes" showLineNumbers{10} add{16-21}
     <p>Steer Ships:</p>
     <div>
         <button id="steer0">Steer 0</button>
         <button id="steer1">Steer 1</button>
         <button id="steer2">Steer 2</button>
     </div>
-    <p>Loop Ships:</p> <!-- [!code ++] -->
-    <div> <!-- [!code ++] -->
-        <input type="checkbox" id="loop0" checked>Loop 0</input> <!-- [!code ++] -->
-        <input type="checkbox" id="loop1" checked>Loop 1</input> <!-- [!code ++] -->
-        <input type="checkbox" id="loop2" checked>Loop 2</input> <!-- [!code ++] -->
-    </div> <!-- [!code ++] -->
+    <p>Loop Ships:</p>
+    <div>
+        <input type="checkbox" id="loop0" checked>Loop 0</input>
+        <input type="checkbox" id="loop1" checked>Loop 1</input>
+        <input type="checkbox" id="loop2" checked>Loop 2</input>
+    </div>
 </fieldset>
 ```
 
 Regarding the JavaScript, I'll be using `performance.now(){:js}` and checking if the difference between it and `window.lastRot{:js}` is greater than 500ms. This check will happen every tick, and in theory will create a consistently steering ship that doesn't produce `"ILLEGAL_MOVE"{:js}`s for inputting too quickly:
 
-```js title="solve.js" caption="Implementing looped rotations" showLineNumbers{40}
-window.lastRot = 0; // [!code ++]
+```js title="solve.js" caption="Implementing looped rotations" showLineNumbers{40} add{40,59-70}
+window.lastRot = 0;
 
 // Runs when output from server is received
 socket.onmessage = function (event) {
@@ -675,18 +577,18 @@ socket.onmessage = function (event) {
     } else {
         log(JSON.stringify(JSON.parse(event.data)));
     }
-    // Guard clause for looping ships! // [!code ++]
-    if (performance.now() - window.lastRot < 500) return; // [!code ++]
-    window.lastRot = performance.now(); // [!code ++]
-    // Sends steer if checkbox is checked // [!code ++]
-    findAll("loop").forEach(function (element, index) { // [!code ++]
-        if (element.checked) { // [!code ++]
-            socket.send(JSON.stringify({ // [!code ++]
-                type: "SHIP_STEER", // [!code ++]
-                shipId: `${index}` // [!code ++]
-            })); // [!code ++]
-        } // [!code ++]
-    }); // [!code ++]
+    // Guard clause for looping ships!
+    if (performance.now() - window.lastRot < 500) return;
+    window.lastRot = performance.now();
+    // Sends steer if checkbox is checked
+    findAll("loop").forEach(function (element, index) {
+        if (element.checked) {
+            socket.send(JSON.stringify({
+                type: "SHIP_STEER",
+                shipId: `${index}`
+            }));
+        }
+    });
 };
 ```
 
@@ -701,7 +603,7 @@ We've managed to stabilize the playing field for a manual solve! Let's flag the 
   Your browser does not support the video tag.
 </video>
 
-```text
+```text /CTF{c4pt41N-m0rG4N}/
 ...
 ID: 0 | (760, 105) (820, 343) | DIR: UP
 ID: 1 | (736, 101) (796, 371) | DIR: UP
@@ -735,7 +637,7 @@ This means I can flag this level without needing to code at all!:
   Your browser does not support the video tag.
 </video>
 
-```text
+```text /CTF{C4pt41N-4MErIc4}/
 ...
 ID: 0 | (742, 107) (802, 345) | DIR: UP
 ID: 1 | (731, 105) (791, 385) | DIR: UP
@@ -830,7 +732,7 @@ let obstacles = [
 
 Next, let's create the aforementioned `hasRotated` object alongside the `check()` function, which will implement the three criteria:
 
-```js title="solve.js" caption="Creating check() function" showLineNumbers{70} skip{78-151}
+```js title="solve.js" caption="Creating check() function" showLineNumbers{70}
 let hasRotated = {
     0: false,
     1: false,
@@ -839,80 +741,7 @@ let hasRotated = {
     4: false,
     5: false
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// [!code skip:78:151]
 // Checks if ship should turn 180°
 function check(ship, obstacle, direction) {
     if (!hasRotated[ship.id] &&                         // Check 1
@@ -963,7 +792,7 @@ In theory, these checks should cause the ships to bounce back and forth in their
 
 Yes! We've managed to stabilize level 5 completely! Now, we need to be able to toggle the lanes off to manually solve the challenge. Let's add more checkboxes to the HTML and adjust the JS accordingly:
 
-```html title="index.html" caption="Adding lane checkboxes" showLineNumbers{21}
+```html title="index.html" caption="Adding lane checkboxes" showLineNumbers{21} add{30-37}
             <p>Loop Ships:</p>
             <div>
                 <input type="checkbox" id="loop0" checked>Loop 0</input>
@@ -973,20 +802,20 @@ Yes! We've managed to stabilize level 5 completely! Now, we need to be able to t
                 <input type="checkbox" id="loop4" checked>Loop 4</input>
                 <input type="checkbox" id="loop5" checked>Loop 5</input>
             </div>
-            <p> Disable Obstacles: </p> <!-- [!code ++] -->
-            <div> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle0">1/2</input> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle1">3/4</input> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle2">5/8</input> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle3">6/10</input> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle4">7/12</input> <!-- [!code ++] -->
-                <input type="checkbox" id="toggle5">9/11</input> <!-- [!code ++] -->
+            <p> Disable Obstacles: </p>
+            <div>
+                <input type="checkbox" id="toggle0">1/2</input>
+                <input type="checkbox" id="toggle1">3/4</input>
+                <input type="checkbox" id="toggle2">5/8</input>
+                <input type="checkbox" id="toggle3">6/10</input>
+                <input type="checkbox" id="toggle4">7/12</input>
+                <input type="checkbox" id="toggle5">9/11</input>
             </div>
         </fieldset>
 ```
 
-```js title="solve.js" caption="Toggleable lanes" showLineNumbers{80}
-let checkList = findAll("toggle"); // [!code ++]
+```js title="solve.js" caption="Toggleable lanes" showLineNumbers{80} add{80,96,99-100,103-104,107-108,111-112,115-116}
+let checkList = findAll("toggle");
 
 // Runs when output from server is received
 socket.onmessage = function (event) {
@@ -1002,27 +831,27 @@ socket.onmessage = function (event) {
         for (const i of ships) {
             log(i.printState);
             // Infinite checks!
-            if (!checkList[0].checked) { // [!code ++]
+            if (!checkList[0].checked) {
                 check(s, obstacles[0], "LEFT");
                 check(s, obstacles[1], "RIGHT");
-            } // [!code ++]
-            if (!checkList[1].checked) { // [!code ++]
+            }
+            if (!checkList[1].checked) {
                 check(s, obstacles[2], "LEFT");
                 check(s, obstacles[3], "RIGHT");
-            } // [!code ++]
-            if (!checkList[2].checked) { // [!code ++]
+            }
+            if (!checkList[2].checked) {
                 check(s, obstacles[4], "DOWN");
                 check(s, obstacles[7], "UP");
-            } // [!code ++]
-            if (!checkList[3].checked) { // [!code ++]
+            }
+            if (!checkList[3].checked) {
                 check(s, obstacles[5], "DOWN");
                 check(s, obstacles[9], "UP");
-            } // [!code ++]
-            if (!checkList[4].checked) { // [!code ++]
+            }
+            if (!checkList[4].checked) {
                 check(s, obstacles[6], "DOWN");
                 check(s, obstacles[11], "UP");
-            } // [!code ++]
-            if (!checkList[5].checked) { // [!code ++]
+            }
+            if (!checkList[5].checked) {
                 check(s, obstacles[8], "LEFT");
                 check(s, obstacles[10], "RIGHT");
             }
@@ -1048,162 +877,35 @@ We decided it'd be best if we added another obstacle to perfectly turn us into t
 
 Here is its implementation:
 
-```js title="solve.js" caption="Implementing auto-dock" showLineNumbers{65} skip{70-116,121-202}
+```js title="solve.js" caption="Implementing auto-dock" showLineNumbers{65} add{76-92}
     new Obstacle(1070, 350), //10
     new Obstacle(1530, 200), //11
     new Obstacle(1730, 300), //12
     new Obstacle(232, 575) //13
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// [!code skip:70:116]
             if (!checkList[5].checked) {
                 check(s, obstacles[8], "LEFT");
                 check(s, obstacles[10], "RIGHT");
             }
-            // Auto-docking obstacle
-            check90(s, obstacles[12], "LEFT");
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function check90(s, o, d) { // [!code ++]
-    // Calculates middle of ship in coordinates // [!code ++]
-    let mid = Math.abs(Math.floor(s.topLeft.x + s.bottomRight.x) / 2); // [!code ++]
-    if (!hasRotated[s.id] && // [!code ++]
-        Math.abs(s.topLeft.y - o.y) < 400 && // Large y for legroom // [!code ++]
-        Math.abs(mid - o.x) < 20 && // Small x for accuracy // [!code ++]
-        s.direction == d) { // [!code ++]
-        hasRotated[s.id] = true; // [!code ++]
-        socket.send(JSON.stringify({ // [!code ++]
-            type: "SHIP_STEER", // [!code ++]
-            shipId: s.id // [!code ++]
-        })); // [!code ++]
-        setTimeout(() => { // [!code ++]
-            hasRotated[s.id] = false // [!code ++]
-        }, "1000"); // [!code ++]
-    } // [!code ++]
-} // [!code ++]
+// [!code skip:121:202]
+function check90(s, o, d) {
+    // Calculates middle of ship in coordinates
+    let mid = Math.abs(Math.floor(s.topLeft.x + s.bottomRight.x) / 2);
+    if (!hasRotated[s.id] &&
+        Math.abs(s.topLeft.y - o.y) < 400 && // Large y for legroom
+        Math.abs(mid - o.x) < 20 && // Small x for accuracy
+        s.direction == d) {
+        hasRotated[s.id] = true;
+        socket.send(JSON.stringify({
+            type: "SHIP_STEER",
+            shipId: s.id
+        }));
+        setTimeout(() => {
+            hasRotated[s.id] = false
+        }, "1000");
+    }
+}
 ```
 
 When you turn a ship through those rocks into the obstacle, the ship will now automatically turn to enter the dock perfectly:
@@ -1463,5 +1165,3 @@ If you made it to this point of the writeup, I want to sincerely thank you for r
 Update: There I am! 🎉 Thanks for the support, everybody.
 
 ![Leaderboard](assets/leaderboard.png)
-
---- \*/}

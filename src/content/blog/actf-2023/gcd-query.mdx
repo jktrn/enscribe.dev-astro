@@ -27,7 +27,7 @@ High school CTF team [View Source](https://ctftime.org/team/175828) and I partic
       avatar: 'https://github.com/jktrn.png',
     },
   ]}
-  category="algo"
+  category="PPC"
   points={475}
   solves={43}
 >
@@ -331,7 +331,7 @@ We've solved `gcd-query-v1`!
       avatar: 'https://github.com/jktrn.png',
     },
   ]}
-  category="algo"
+  category="PPC"
   points={481}
   solves={34}
 >
@@ -371,7 +371,7 @@ It seems that they haven't changed much. The only things that are different are:
 
 Well, first step is to try and rerun the same script that we used for "gcd-query-v1" with some minor edits:
 
-```py title="solve.py" caption="v2 Solve Attempt" showLineNumbers
+```py title="solve.py" caption="v2 Solve Attempt" showLineNumbers add{11,18} remove{10,13,17}
 from sympy.ntheory.modular import crt
 from sympy import primorial
 from tqdm import tqdm
@@ -381,15 +381,15 @@ from pwn import *
 N = 2**8
 primorial = primorial(N)
 
-p = remote('amt.rs', 31692) # [!code --]
-p = remote('amt.rs', 31693) # [!code ++]
+p = remote('amt.rs', 31692)
+p = remote('amt.rs', 31693)
 
-for _ in range(10): # [!code --]
+for _ in range(10):
     remainders = []
     moduli = []
 
-    for j in tqdm(range(1412)): # [!code --]
-    for j in tqdm(range(16)): # [!code ++]
+    for j in tqdm(range(1412)):
+    for j in tqdm(range(16)):
         n = -j
         m = primorial
         p.sendlineafter(b'n m: ', bytes(f'{n} {m}', 'utf-8'))
@@ -434,11 +434,11 @@ I added some print statements to see what we were getting in our moduli and rema
 
 Wow, check out that moduli array... that's not even nearly enough prime factors to accurately apply CRT. Let's increase the primorial then for increased chances:
 
-```py title="solve.py" caption="Changing Primorial" showLineNumbers{6}
-# Generate the 256th primorial # [!code --]
-N = 2**8 # [!code --]
-# Generate the 1024th primorial # [!code ++]
-N = 2**10 # [!code ++]
+```py title="solve.py" caption="Changing Primorial" showLineNumbers{6} add{6-7} remove{8-9}
+# Generate the 256th primorial
+N = 2**8
+# Generate the 1024th primorial
+N = 2**10
 primorial = primorial(N)
 ```
 

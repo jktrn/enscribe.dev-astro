@@ -201,6 +201,9 @@
                 counter-increment: none;
               }
             }
+            &.highlight {
+              @apply bg-foreground/10;
+            }
           }
 
           /* Copy button */
