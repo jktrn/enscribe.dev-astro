@@ -26,13 +26,11 @@ function parseDiffString(meta: string): DiffInfo {
 }
 
 function parseRanges(rangeString: string): number[] {
-  return rangeString
-    .split(',')
-    .flatMap((v) => {
-      const [start, end] = v.split('-').map(n => parseInt(n, 10))
-      if (!end) return [start]
-      return Array.from({ length: end - start + 1 }, (_, i) => i + start)
-    })
+  return rangeString.split(',').flatMap((v) => {
+    const [start, end] = v.split('-').map((n) => parseInt(n, 10))
+    if (!end) return [start]
+    return Array.from({ length: end - start + 1 }, (_, i) => i + start)
+  })
 }
 
 function parseStartingLineNumber(meta: string): number | null {
@@ -63,11 +61,13 @@ export function transformerDiffHighlight(
     name: '@shikijs/transformers:diff-highlight',
     preprocess(code) {
       if (this.options.meta?.__raw) {
-        const diffInfo = parseDiffString(this.options.meta.__raw);
-        (this.meta as any)[diffSymbol] = diffInfo
+        const diffInfo = parseDiffString(this.options.meta.__raw)
+        ;(this.meta as any)[diffSymbol] = diffInfo
 
-        const startingLineNumber = parseStartingLineNumber(this.options.meta.__raw);
-        (this.meta as any)[startLineSymbol] = startingLineNumber || 1
+        const startingLineNumber = parseStartingLineNumber(
+          this.options.meta.__raw,
+        )
+        ;(this.meta as any)[startLineSymbol] = startingLineNumber || 1
       }
       return code
     },

@@ -44,3 +44,21 @@ export async function parseAuthors(authors: string[]) {
 
   return await Promise.all(authors.map(parseAuthor))
 }
+
+export function getElapsedTime(unixTimestamp: number): string {
+  const createdAt = new Date(unixTimestamp)
+  const now = new Date()
+  let difference = now.getTime() - createdAt.getTime()
+
+  const hours = Math.floor(difference / (1000 * 60 * 60))
+  difference -= hours * (1000 * 60 * 60)
+
+  const minutes = Math.floor(difference / (1000 * 60))
+  difference -= minutes * (1000 * 60)
+
+  const seconds = Math.floor(difference / 1000)
+
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')} elapsed`
+}

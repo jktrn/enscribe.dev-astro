@@ -18,6 +18,10 @@
   font-display: swap;
 }
 
+.styles-module_calendar__sT1ND text {
+  fill: currentColor;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

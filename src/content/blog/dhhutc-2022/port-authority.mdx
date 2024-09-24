@@ -673,7 +673,7 @@ Level five gives us a large increase in rocks, a tiny harbor, and six total ship
 
 Luckily, during some experimenation on level 1 I found out that you can actually do a full 180° turn by calling two consecutive turns in the code. In doing so, the ship won't hit any of the objects in its surroundings as compared to if it rotated 90° twice. We can observe this phenomenon below:
 
-<div className="align-center flex flex-col justify-center gap-0 md:flex-row md:gap-4">
+<div className="align-center flex flex-col justify-center gap-0 sm:flex-row sm:gap-4">
   ```js title="solve.js" caption="180° turn" showLineNumbers{142}
           function turn180(id) {
             socket.send(JSON.stringify({

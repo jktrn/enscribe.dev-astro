@@ -1,0 +1,142 @@
+---
+import AvatarComponent from '@/components/ui/avatar'
+import { cn, getElapsedTime } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+
+const lanyard = await fetch(
+  'https://api.lanyard.rest/v1/users/747519888347627550',
+).then((res) => res.json())
+
+const mainActivity = lanyard.data.activities.filter(
+  (activity: any) => activity.type === 0 && activity.assets,
+)[0]
+
+const hasMainActivity = !!mainActivity
+
+const elapsedTime =
+  mainActivity && mainActivity.timestamps && mainActivity.timestamps.start
+    ? getElapsedTime(mainActivity.timestamps.start)
+    : ''
+---
+
+<div class="relative overflow-hidden sm:aspect-square">
+  <div class="grid size-full grid-rows-4">
+    <div class="bg-secondary/50"></div>
+    <div class="row-span-3 flex flex-col gap-3 p-3">
+      <div class="flex justify-between gap-x-1">
+        <div class="relative">
+          <AvatarComponent
+            src="/static/avatar.webp"
+            alt="Avatar"
+            fallback="e"
+            className="-mt-[4.5rem] aspect-square size-24 rounded-full"
+            client:load
+          />
+          <div
+            class={cn(
+              'absolute bottom-0 right-0 size-6 rounded-full border-4 border-background',
+              {
+                'flex items-center justify-center bg-primary':
+                  lanyard.data.discord_status === 'online',
+                'bg-primary': lanyard.data.discord_status === 'idle',
+                'flex items-center justify-center bg-destructive':
+                  lanyard.data.discord_status === 'dnd',
+                'flex items-center justify-center bg-muted-foreground':
+                  lanyard.data.discord_status === 'offline',
+              },
+            )}
+          >
+            {
+              lanyard.data.discord_status === 'idle' && (
+                <div class="size-[10px] rounded-full bg-background" />
+              )
+            }
+            {
+              lanyard.data.discord_status === 'dnd' && (
+                <div class="h-[4px] w-[11px] rounded-full bg-background" />
+              )
+            }
+            {
+              lanyard.data.discord_status === 'offline' && (
+                <div class="size-2 rounded-full bg-background" />
+              )
+            }
+          </div>
+        </div>
+        <div class="flex items-center rounded-xl bg-secondary/50 px-2">
+          <Image
+            src="/static/bento/badges.png"
+            alt="Discord Badges"
+            width={104}
+            height={24}
+            class="grayscale"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col gap-y-1 rounded-xl bg-secondary/50 p-3">
+        <span class="text-base leading-none">enscribe</span>
+        <span class="text-xs leading-none text-muted-foreground">@enscribe</span
+        >
+      </div>
+      <div class="flex grow rounded-xl bg-secondary/50 px-3 py-2">
+        {
+          hasMainActivity ? (
+            <div class="flex items-center gap-x-3">
+              <div
+                class="relative aspect-square h-full w-auto rounded-md bg-contain grayscale invert dark:invert-0"
+                style={`background-image: url('https://cdn.discordapp.com/app-assets/${mainActivity.application_id}/${mainActivity.assets.large_image}.png')`}
+              >
+                <Image
+                  src={`https://cdn.discordapp.com/app-assets/${mainActivity.application_id}/${mainActivity.assets.small_image}.png`}
+                  alt="Now Playing"
+                  width={20}
+                  height={20}
+                  class="absolute -bottom-1 -right-1 rounded-full border-2 grayscale invert dark:invert-0"
+                />
+              </div>
+              <div class="my-2 flex flex-col gap-y-1 overflow-hidden">
+                {mainActivity.name && (
+                  <div class="mb-0.5 line-clamp-1 text-xs leading-none">
+                    {mainActivity.name}
+                  </div>
+                )}
+                {mainActivity.details && (
+                  <div class="line-clamp-1 text-[10px] leading-none text-muted-foreground">
+                    {mainActivity.details}
+                  </div>
+                )}
+                {mainActivity.state && (
+                  <div class="line-clamp-1 text-[10px] leading-none text-muted-foreground">
+                    {mainActivity.state}
+                  </div>
+                )}
+                {elapsedTime && (
+                  <div class="text-[11px] leading-none text-muted-foreground">
+                    {elapsedTime}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div class="flex size-full flex-col items-center justify-center gap-1">
+              <Image
+                src="/static/images/bento/bento-discord-futon.svg"
+                alt="No Status Image"
+                width={64}
+                height={64}
+                class="h-full w-fit rounded-lg"
+              />
+              <div class="text-[10px] text-muted-foreground">No status!</div>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+  <div
+    class="absolute right-0 top-0 z-[1] m-3 flex size-14 items-center justify-center rounded-full bg-primary"
+  >
+    <Icon name="fa6-brands:discord" class="size-10 text-background" />
+  </div>
+</div>
